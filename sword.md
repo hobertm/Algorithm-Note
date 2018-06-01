@@ -380,6 +380,8 @@ public class P60_TraversalOfBinaryTree {
         return list;
     }
 
+    //前序是当前节点入栈前，把结果放到list里面
+    //中序是出栈之前，把结果放到list里面
     //前序遍历非递归版
     public static List<Integer> preorderIteratively(TreeNode<Integer> node) {
         //stack栈顶元素永远为cur的父节点
@@ -429,12 +431,14 @@ public class P60_TraversalOfBinaryTree {
             if (cur != null) {
                 stack.push(cur);
                 cur = cur.left;
-            } else {
+            } else {                                     //当前为空了，把当前节点变成栈顶的右子结点
                 cur = stack.peek().right;
-                if (cur != null && cur != prevVisted) {
+
+                if (cur != null && cur != prevVisted) { //不为空，且不是刚出栈
+                                                        //需要判断当前节点是否刚被弹出栈，否则会多次进栈
                     stack.push(cur);
                     cur = cur.left;
-                } else {
+                } else {                                //当前节点还是为空或者刚出过栈，栈顶出栈并放到结果数组
                     prevVisted = stack.pop();
                     list.add(prevVisted.val);
                     cur = null;
