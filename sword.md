@@ -337,11 +337,11 @@ public class P58_PrintListInReversedOrder {
 ```java
 
 /**
- * 二叉树的遍历：前序（递归，非递归），中序（递归，非递归），后序（递归，非递归），层序
+ * 二叉树的遍历：先序（递归，非递归），中序（递归，非递归），后序（递归，非递归），层序
  */
 public class P60_TraversalOfBinaryTree {
 
-	//前序遍历递归自己写
+	//先序遍历递归自己写
 	public static void preorderRecursively(TreeNode<Integer> node) {
         System.out.println(node.val);
         if (node.left != null)
@@ -350,7 +350,7 @@ public class P60_TraversalOfBinaryTree {
             preorderRecursively(node.right);
     }
     
-    //前序遍历递归版
+    //先序遍历递归版
     public static List<Integer> preorderRecursively(TreeNode<Integer> node) {
         List<Integer> list = new ArrayList<>();
         if (node == null) return list;
@@ -380,9 +380,9 @@ public class P60_TraversalOfBinaryTree {
         return list;
     }
 
-    //前序是当前节点入栈前，把结果放到list里面
+    //先序是当前节点入栈前，把结果放到list里面
     //中序是出栈之前，把结果放到list里面
-    //前序遍历非递归版
+    //先序遍历非递归版
     public static List<Integer> preorderIteratively(TreeNode<Integer> node) {
         //stack栈顶元素永远为cur的父节点
         Stack<TreeNode<Integer>> stack = new Stack<>();
@@ -506,26 +506,26 @@ public class P60_TraversalOfBinaryTree {
 ```java
 
 /**
- * 重建二叉树:  前序+中序，后续+中序可以完成重建，而前序+后序无法完成
+ * 重建二叉树:  先序+中序，后续+中序可以完成重建，而先序+后序无法完成
  */
 public class P62_ConstructBinaryTree {
     public static TreeNode construct(int[] preorder, int[] inorder) {
         if (preorder == null || inorder == null || preorder.length == 0 || preorder.length != inorder.length)
             return null;
-        return constructCore(preorder, 0, inorder, 0, preorder.length);
+        return constructCore(preorder, 0, inorder, 0, inorder.length); //递归时需要传递的，先序和中序的开始位置初始为0，length是中序的长度
     }
 
     public static TreeNode constructCore(int[] preorder, int preorder_start, int[] inorder, int inorder_start, int length) {
-        if (length == 0) return null;
+        if (length == 0) return null;                                   //length是先序的长度，为零是递归出口
         int inorder_index = -1;
-        for (int i = inorder_start; i < inorder_start + length; i++) {
-            if (inorder[i] == preorder[preorder_start]) {
+        for (int i = inorder_start; i < inorder_start + length; i++) {  //遍历中序的序列
+            if (inorder[i] == preorder[preorder_start]) {               //找到当前的根节点位置，记录到inorder_index
                 inorder_index = i;
                 break;
             }
         }
-        int left_length = inorder_index - inorder_start;
-        TreeNode node = new TreeNode(preorder[preorder_start]);
+        int left_length = inorder_index - inorder_start;                //左边中序序列的长度，右边序列长length-left_length-1
+        TreeNode node = new TreeNode(preorder[preorder_start]);         //根节点变成TreeNode，node的左右孩子是向下递归的结果
         node.left = constructCore(preorder, preorder_start + 1, inorder, inorder_start, left_length);
         node.right = constructCore(preorder, preorder_start + left_length + 1, inorder, inorder_index + 1, length - left_length - 1);
         return node;
@@ -554,4 +554,746 @@ public class P62_ConstructBinaryTree {
     }
 }
 
+```
+
+8. 二叉树的下一个节点
+
+```java
+
+/*
+题目要求：
+给定二叉树和其中一个节点，找到中序遍历序列的下一个节点。
+树中的节点除了有左右孩子指针，还有一个指向父节点的指针。
+*/
+
+/*
+思路：
+（1）如果输入的当前节点有右孩子，则它的下一个节点即为该右孩子为根节点的子树的最左边的节点，比如2->5,1->3
+（2）如果输入的当前节点没有右孩子，就需要判断其与自身父节点的关系：
+（2.1）如果当前节点没有父节点，那所求的下一个节点不存在，返回null.
+（2.2）如果输入节点是他父节点的左孩子，那他的父节点就是所求的下一个节点,比如4->2
+（2.3）如果输入节点是他父节点的右孩子，那就需要将输入节点的父节点作为新的当前节点，
+ 返回到（2）,判断新的当前节点与他自身父节点的关系,比如5->1
+ */
+
+
+//带有父指针的二叉树节点
+class TreeNode {
+    public int val;
+    public TreeNode left;
+    public TreeNode right;
+    public TreeNode father;
+    public TreeNode(int val){
+        this.val = val;
+        this.left = null;
+        this.right = null;
+        this.father = null;
+    }
+}
+
+public class P65_NextNodeInBinaryTrees {
+    public static TreeNode getNext(TreeNode pNode){
+        if(pNode==null)
+            return null;
+        else if(pNode.right!=null){
+            pNode = pNode.right;
+            while(pNode.left!=null)
+                pNode = pNode.left;
+            return pNode;
+        }
+        while(pNode.father!=null){
+            if(pNode.father.left==pNode)
+                return pNode.father;
+            pNode = pNode.father;
+        }
+        return null;
+    }
+    public static void main(String[] args){
+        //            1
+        //          // \\
+        //         2     3
+        //       // \\
+        //      4     5
+        //    inorder->42513
+        TreeNode root = new TreeNode(1);
+        root.left = new TreeNode(2);
+        root.left.father = root;
+        root.right = new TreeNode(3);
+        root.right.father = root;
+        root.left.left = new TreeNode(4);
+        root.left.left.father = root.left;
+        root.left.right = new TreeNode(5);
+        root.left.right.father = root.left;
+
+        System.out.println(getNext(root.left.left).val);
+        System.out.println(getNext(root.left).val);
+        System.out.println(getNext(root.left.right).val);
+        System.out.println(getNext(root).val);
+        System.out.println(getNext(root.right));
+    }
+}
+
+```
+
+9. 用两个栈实现队列  
+
+
+```java
+
+/*
+ 思路：
+（1）对于插入操作，栈与队列都是从队尾进行，因此一行代码就可以完成offer()
+（2）对于弹出操作，队列先进先出从队头开始，而栈后进先出从队尾开始，要想取到队头元素，
+ 就得需要第二个栈stack2的协助：弹出时将stack1的元素依次取出放到stack2中，此时stack2
+ 进行弹出的顺序就是整个队列的弹出顺序。而如果需要插入，放到stack1中即可。
+ 总结下，stack1负责插入，stack2负责弹出，如果stack2为空了，将stack1的元素依次弹出并
+ 存放到stack2中，之后对stack2进行弹出操作。
+*/
+
+class MyQueue<T>{
+    private Stack<T> stack1 = new Stack<>();
+    private Stack<T> stack2 = new Stack<>();
+    
+    public void offer(T data){
+        stack1.push(data);   
+    }
+    public T poll(){
+        if(!stack2.isEmpty()){
+            return stack2.pop();
+        }
+        else if(!stack1.isEmpty()){
+            while(!stack1.isEmpty())
+                stack2.push(stack1.pop());
+            return stack2.pop();
+        }
+        else
+            return null;
+    }
+}
+
+public class P68_QueueWithTwoStacks {
+    public static void main(String[] args){
+        MyQueue<Integer> myQueue = new MyQueue<>();
+        System.out.println(myQueue.poll());
+        myQueue.offer(1);
+        myQueue.offer(2);
+        myQueue.offer(3);
+        System.out.println(myQueue.poll());
+        System.out.println(myQueue.poll());
+        myQueue.offer(4);
+        System.out.println(myQueue.poll());
+        System.out.println(myQueue.poll());
+        System.out.println(myQueue.poll());
+    }
+}
+
+```
+
+10. 斐波那契数列  
+
+```java
+/**
+ * Created by ryder on 2017/6/21.
+ * 斐波那契数列
+ * f(0)=0,f(1)=1,f(n)=f(n-1)+f(n-2) n>1
+ */
+
+解法  解法介绍        时间复杂度   空间复杂度
+解法1 依定义递归求解     o(n^2)     o(1)
+解法2 从0开始迭代求解    o(n)       o(1)
+解法3 借助等比数列公式   o(logn)    o(1)
+解法4 借助通项公式       o(1)       o(1)
+
+public class P74_Fibonacci {
+
+    // 依据原始概念的递归解法，时间复杂度o(n^2)
+    public static int fibonacci1(int n){
+        if(n<=0)
+            return 0;
+        if(n==1)
+            return 1;
+        return fibonacci1(n-1)+fibonacci1(n-2);
+    }
+
+    // 当前状态只与前两个状态有关。存储前两个值，计算后一个，迭代进行。时间复杂度o(n)
+    public static int fibonacci2(int n){
+        if(n<=0)
+            return 0;
+        if(n==1)
+            return 1;
+        int temp1 =0,temp2=1;
+        int result = temp1 + temp2,i=3;
+        while(i<=n){
+            //也可用一个队列来完成下面三行的操作
+            temp1 = temp2;
+            temp2 = result;
+            result = temp1+temp2;
+            i++;
+        }
+        return result;
+    }
+
+    // 借助如下数学公式解决问题。矩阵乘法部分，可用递归解决，时间复杂度o(logn)
+    // [ f(n)  f(n-1) ] = [ 1  1 ] ^ n-1   (当n>2)
+    // [f(n-1) f(n-2) ]   [ 1  0 ]
+    // 证明:
+    // [ f(n)  f(n-1) ] = [ f(n-1)+f(n-2)  f(n-1)] = [ f(n-1)  f(n-2)] * [1 1]
+    // [f(n-1) f(n-2) ]   [ f(n-2)+f(n-3)  f(n-2)]   [ f(n-2)  f(n-3)]   [1 0]
+    // 得到如上递推式，所以
+    // [ f(n)  f(n-1) ] = [ f(2)  f(1)] * [1 1]^n-2 = [1 1]^n-1
+    // [f(n-1) f(n-2) ]   [ f(1)  f(0)]   [1 0]       [1 0]
+    public static int fibonacci3(int n){
+        int[][] start = {{1,1},{1,0}};
+        return matrixPow(start,n-1)[0][0];
+    }
+    public static int[][] matrixPow(int[][] start,int n){
+         if((n&1)==0){
+             int[][] temp = matrixPow(start,n>>1);
+             return matrixMultiply(temp,temp);
+         }
+         else if(n==1){
+             return start;
+         }
+         else{
+             return matrixMultiply(start,matrixPow(start,n-1));
+         }
+    }
+    public static int[][] matrixMultiply(int[][] x,int[][] y){
+        int[][] result = new int[x.length][y[0].length];
+        for(int i=0;i<x.length;i++){
+            for(int j=0;j<y[0].length;j++){
+                int sum = 0;
+                for(int k=0;k<x[0].length;k++){
+                    sum += x[i][k]*y[k][j];
+                }
+                result[i][j] = sum;
+            }
+        }
+        return result;
+    }
+
+    // 使用通项公式完成，时间复杂度o(1)
+    // f(n) = (1/√5)*{[(1+√5)/2]^n - [(1-√5)/2]^n}
+    // 推导过程可参考https://wenku.baidu.com/view/57333fe36bd97f192379e936.html
+    public static int fibonacci4(int n){
+        double gen5 = Math.sqrt(5);
+        return (int)((1/gen5)*(Math.pow((1+gen5)/2,n)- Math.pow((1-gen5)/2,n)));
+    }
+
+    public static void main(String[] args){
+        System.out.println(fibonacci1(13));
+        System.out.println(fibonacci2(13));
+        System.out.println(fibonacci3(13));
+        System.out.println(fibonacci4(13));
+    }
+}
+
+```
+
+
+排序算法比较表格  
+https://www.jianshu.com/p/6ae77d17170c  
+
+```java
+快排：
+package chapter2;
+public class P79_Sort {
+    //数组快排，时间o(nlogn)(最差n^2)，空间o(logn)(最差n)，递归造成的栈空间的使用，不稳定
+    public static void quickSort(int[] data){
+        if(data==null || data.length<=1) return;
+        quickSortCore(data,0,data.length-1);
+    }
+    public static void quickSortCore(int[] data,int start,int end){
+        if(end-start<=0)
+            return;
+        int index = quickSortPartition(data,start,end);
+        quickSortCore(data,start,index-1);
+        quickSortCore(data,index+1,end);
+    }
+    public static int quickSortPartition(int[] data,int start,int end){
+        //选择第一个值作为基准
+        int pivot = data[start];
+        int left = start,right = end;
+        while(left<right){
+            while(left<right && data[right]>=pivot)
+                right--;
+            if(left<right)
+                data[left] = data[right];
+            while(left<right && data[left]<pivot)
+                left++;
+            if(left<right)
+                data[right] = data[left];
+        }
+        data[left] = pivot;
+        return left;
+    }
+    public static void testQuickSort(){
+        int[] data = {5,4,3,1,2};
+        quickSort(data);
+        System.out.print("数组快速排序：\t");
+        for(int item: data){
+            System.out.print(item);
+            System.out.print('\t');
+        }
+        System.out.println();
+    }
+}
+归并排序：
+package chapter2;
+
+/**
+ * Created by ryder on 2017/6/25.
+ * 数组排序算法
+ */
+public class P79_Sort {
+    //数组二路归并，时间o(nlogn)，空间o(n)，稳定
+    public static int[] mergeSort(int[] data){
+        if(data==null || data.length<=1)
+            return data;
+        mergeSortCore(data,0,data.length-1);
+        return data;
+    }
+    //对data[start~mid]，data[mid+1~end]归并
+    //典型的分治结构：结束条件+分治+和
+    public static void mergeSortCore(int[] data,int start,int end){
+        if(start>=end)
+            return;
+        int mid = start + (end - start)/2;
+        mergeSortCore(data,start,mid);
+        mergeSortCore(data,mid+1,end);
+        mergeSortMerge(data,start,mid,end);
+    }
+    public static void mergeSortMerge(int[] data,int start,int mid,int end){
+        if(end==start)
+            return;
+        int[] temp = new int[end-start+1];
+        int left = start,right = mid+1,tempIndex = 0;
+        while(left<=mid && right<=end){
+            if(data[left]<data[right])
+                temp[tempIndex++] = data[left++];
+            else
+                temp[tempIndex++] = data[right++];
+        }
+        while(left<=mid)
+            temp[tempIndex++] = data[left++];
+        while(right<=end)
+            temp[tempIndex++] = data[right++];
+        for(int i=0;i<temp.length;i++)
+            data[start+i] = temp[i];
+    }
+    public static void testMergeSort(){
+        int[] data = {5,4,3,1,2};
+        mergeSort(data);
+        System.out.print("数组归并排序：\t");
+        for(int item: data){
+            System.out.print(item);
+            System.out.print('\t');
+        }
+        System.out.println();
+    }
+}
+堆排序：
+package chapter2;
+
+/**
+ * Created by ryder on 2017/6/25.
+ * 数组排序算法
+ */
+public class P79_Sort {
+    //数组堆排序，时间o(nlogn)，空间o(1),不稳定
+    //建立最大堆，交换堆的第一个与最后一个元素，调整堆
+    //注意，堆排序的0号元素不能使用，为了与其他排序统一接口，先把最小的元素放到0号元素上，再用堆排序
+    public static void heapSort(int[] data){
+        if(data==null || data.length<=1)
+            return;
+        //先把最小的元素放到0号元素上
+        int minIndex = 0;
+        for(int i=1;i<data.length;i++){
+            if(data[i]<data[minIndex])
+                minIndex = i;
+        }
+        if(minIndex!=0){
+            int temp = data[0];
+            data[0] = data[minIndex];
+            data[minIndex] = temp;
+        }
+        //正式开始堆排序（如果0号元素未存值，省略上述代码）
+        buildMaxHeap(data);
+        for(int indexBound = data.length-1;indexBound>1;){
+            int temp = data[indexBound];
+            data[indexBound] = data[1];
+            data[1] = temp;
+            indexBound--;
+            adjustMaxHeap(data,1,indexBound);
+        }
+    }
+    public static void buildMaxHeap(int[] data){
+        for(int i = data.length/2;i>0;i--){
+            adjustMaxHeap(data,i,data.length-1);
+        }
+    }
+    //i表示待调整元素下标，end表示最大堆的最后一个元素的下标，end值会随着排序的进行而减小到1
+    public static void adjustMaxHeap(int[] data,int i,int end){
+        int left = 2*i;
+        int right = 2*i+1;
+        int max = i;
+        if(left<=end && data[left]>data[max])
+            max = left;
+        if(right<=end && data[right]>data[max])
+            max = right;
+        if(max!=i){
+            int temp = data[max];
+            data[max] = data[i];
+            data[i] = temp;
+            adjustMaxHeap(data,max,end);
+        }
+    }
+
+    public static void testHeapSort(){
+        int[] data = {5,4,3,1,2};
+        heapSort(data);
+        System.out.print("数组堆排序：\t");
+        for(int item: data){
+            System.out.print(item);
+            System.out.print('\t');
+        }
+        System.out.println();
+    }
+}
+冒泡排序：
+package chapter2;
+
+/**
+ * Created by ryder on 2017/6/25.
+ * 数组排序算法
+ */
+public class P79_Sort {
+    //数组冒泡，时间o(n^2)，空间o(1)，稳定
+    public static void bubbleSort(int[] data){
+        if(data==null || data.length<=1)
+            return;
+        for(int i=0;i<data.length-1;i++){
+            for(int j=1;j<data.length-i;j++){
+                if(data[j-1]>data[j]){
+                    int temp = data[j-1];
+                    data[j-1] = data[j];
+                    data[j] = temp;
+                }
+            }
+        }
+    }
+    public static void testBubbleSort(){
+        int[] data = {5,4,3,1,2};
+        bubbleSort(data);
+        System.out.print("数组冒泡排序：\t");
+        for(int item: data){
+            System.out.print(item);
+            System.out.print('\t');
+        }
+        System.out.println();
+    }
+}
+选择排序：
+package chapter2;
+
+/**
+ * Created by ryder on 2017/6/25.
+ * 数组排序算法
+ */
+public class P79_Sort {
+    //数组选择排序，时间o(n^2)，空间o(1)，不稳定
+    public static void selectionSort(int[] data){
+        if(data==null || data.length<=1)
+            return;
+        for(int i=0;i<data.length-1;i++){
+            int minIndex = i;
+            for(int j=i+1;j<data.length;j++){
+                if(data[j]<data[minIndex])
+                    minIndex = j;
+            }
+            if(i!=minIndex) {
+                int temp = data[i];
+                data[i] = data[minIndex];
+                data[minIndex] = temp;
+            }
+        }
+    }
+    public static void testSelectionSort(){
+        int[] data = {5,4,3,1,2};
+        selectionSort(data);
+        System.out.print("数组选择排序：\t");
+        for(int item: data){
+            System.out.print(item);
+            System.out.print('\t');
+        }
+        System.out.println();
+    }
+}
+插入排序：
+package chapter2;
+
+/**
+ * Created by ryder on 2017/6/25.
+ * 数组排序算法
+ */
+public class P79_Sort {
+    //数组插入排序，时间o(n^2)，空间o(1)，稳定
+    public static void insertionSort(int[] data){
+        if(data==null || data.length<=1)
+            return;
+        for(int i=1;i<data.length;i++){
+            int j=i;
+            int temp = data[i];
+            while(j>0 && data[j-1]>temp) {
+                data[j] = data[j-1];
+                j--;
+            }
+            data[j] = temp;
+        }
+    }
+    public static void testInsertionSort(){
+        int[] data = {5,4,3,1,2};
+        insertionSort(data);
+        System.out.print("数组插入排序：\t");
+        for(int item: data){
+            System.out.print(item);
+            System.out.print('\t');
+        }
+        System.out.println();
+    }
+}
+希尔排序：
+package chapter2;
+
+/**
+ * Created by ryder on 2017/6/25.
+ * 数组排序算法
+ */
+public class P79_Sort {
+    //数组希尔排序(插入排序缩小增量)，时间o(n^1.3)，空间o(1)，不稳定
+    //时间复杂度是模糊的，有人在大量的实验后得出结论：
+    //当n在某个特定的范围后希尔排序的比较和移动次数减少至n^1.3。次数取值在1到2之间。
+    public static void shellSort(int[] data){
+        if(data==null || data.length<=1)
+            return;
+        for(int d=data.length/2; d>0; d=d/2){
+            for(int i=d;i<data.length;i++){
+                int cur = i;
+                int temp = data[i];
+                while(cur>=d && data[cur-d]>temp){
+                    data[cur] = data[cur-d];
+                    cur = cur - d;
+                }
+                data[cur] = temp;
+            }
+        }
+    }
+    public static void testShellSort(){
+        int[] data = {5,4,3,1,2};
+        shellSort(data);
+        System.out.print("数组希尔排序：\t");
+        for(int item: data){
+            System.out.print(item);
+            System.out.print('\t');
+        }
+        System.out.println();
+    }
+}
+
+```
+
+11. 旋转数组的最小数字  
+
+```java
+/**
+ * Created by ryder on 2017/6/28.
+ * 旋转数组的最小数字
+ */
+public class P82_MinNumberInRotatedArray {
+    public static int min(int[] data){
+        if(data==null || data.length==0)
+            return -1;
+        int left = 0;
+        int right = data.length-1;
+        int mid;
+        while(left<right){
+            mid = left+(right-left)/2;
+            //left < right
+            if(data[left]<data[right])
+                return data[left];
+            //left > right
+            else if(data[left]>data[right]){
+                if(data[mid]>=data[left])
+                    left = mid + 1;
+                else
+                    right = mid;
+            }
+            //left = right
+            else{
+                if(data[left]<data[mid])
+                    left = mid + 1;
+                else if(data[left]>data[mid])
+                    right = mid;
+                else{
+                    left = left+1;
+                    right = right-1;
+                }
+            }
+        }
+        return data[right];
+    }
+    public static void main(String[] args){
+        int[] data1 = {3,4,5,1,2};
+        int[] data2 = {1,0,1,1,1};
+        int[] data3 = {1,1,1,0,1};
+        System.out.println(min(data1));
+        System.out.println(min(data2));
+        System.out.println(min(data3));
+    }
+}
+
+```
+
+12：矩阵中的路径
+
+题目要求：设计一个函数，用来判断一个矩阵中是否存在一条包含某字符串的路径。  
+（1）起点随意；（2）路径的移动只能是上下左右；（3）访问过的位置不能再访问。  
+以下图矩阵为例，包含“bfce”，但是不包含“abfb”。  
+
+a      b      t      g
+c      f      c      s
+j      d      e      h
+
+```java
+/**
+ * Created by ryder on 2017/7/2.
+ * 矩阵中的路径
+ */
+public class P89_StringPathInMatrix {
+    //回溯法解决
+    public static boolean hasPath(char[][] data,String str){
+        if(data==null || data.length==0 || str==null || str.length()==0)
+            return false;
+        int rowLen = data.length;
+        int colLen = data[0].length;
+        boolean[][] visitFlag = new boolean[rowLen][colLen];
+        for(int row=0;row<rowLen;row++){
+            for(int col=0;col<colLen;col++){
+                visitFlag[row][col] = false;
+            }
+        }
+        for(int row=0;row<rowLen;row++){
+            for(int col=0;col<colLen;col++){
+                if(hasPathCore(data,row,col,visitFlag,str,0))
+                    return true;
+            }
+        }
+        return false;
+    }
+    public static boolean hasPathCore(char[][] data,int rowIndex,int colIndex,
+                                    boolean[][] visitFlag,String str,int strIndex){
+        //结束条件
+        if(strIndex>=str.length()) return true;
+        if(rowIndex<0 || colIndex<0 || rowIndex>=data.length || colIndex>=data[0].length) 
+            return false;
+
+        //递归
+        if(!visitFlag[rowIndex][colIndex]&&data[rowIndex][colIndex]==str.charAt(strIndex)){
+            //如果未被访问，且匹配字符串，标记当前位置为已访问，分上下左右四个位置递归求解
+            visitFlag[rowIndex][colIndex] = true;
+            boolean result =  
+                    hasPathCore(data,rowIndex+1,colIndex,visitFlag,str,strIndex+1) ||
+                    hasPathCore(data,rowIndex-1,colIndex,visitFlag,str,strIndex+1) ||
+                    hasPathCore(data,rowIndex,colIndex+1,visitFlag,str,strIndex+1) ||
+                    hasPathCore(data,rowIndex,colIndex-1,visitFlag,str,strIndex+1);
+            //已经求的结果，无需修改标记了
+            if(result)
+                return true;
+            //当前递归的路线求解失败，要把这条线路上的标记清除掉
+            //因为其他起点的路径依旧可以访问本路径上的节点。
+            else{
+                visitFlag[rowIndex][colIndex] = false;
+                return false;
+            }
+        }
+            else
+            return false;
+    }
+    public static void main(String[] args){
+        char[][] data = {
+                {'a','b','t','g'},
+                {'c','f','c','s'},
+                {'j','d','e','h'}};
+        System.out.println(hasPath(data,"bfce")); //true
+        System.out.println(hasPath(data,"abfb")); //false,访问过的位置不能再访问
+    }
+}
+
+```
+
+13. 机器人的运动范围  
+
+题目要求：
+地上有一个m行n列的方格，一个机器人从坐标(0,0)的各自开始移动，它每次  
+可以向上下左右移动一格，但不能进入横纵坐标数位之和大于k的格子。  
+例如，当k等于18时，机器人能进入(35,37)，因为3+5+3+7=18；但却不能进入  
+(35,38)，因为3+5+3+8=19>18。  
+请问该机器人能够到达多少个格子。  
+
+解题思路：  
+本题依旧考察回溯法。  
+每前进一步后，可选移动项为上下左右四个；为了判断某一个格子是否可以进入  
+从而进行计数，不仅需要考虑边界值，计算各位数字之和，更要判断该格子是否  
+已经被访问过，。所以需要一个布尔矩阵，用来记录各格子是否已被访问。整体思  
+路与12题类似，具体请参考本系列的导航帖。  
+
+```java
+package chapter2;
+/**
+ * Created by ryder on 2017/7/4.
+ * 机器人的运动范围
+ */
+public class P92_RobotMove {
+    //依旧回溯
+    public static int movingCount(int threshold,int rowLen,int colLen){
+        if(rowLen<=0 || colLen<=0 || threshold<0)
+            return 0;
+        boolean[][] visitFlag = new boolean[rowLen][colLen];
+        for(int row=0;row<rowLen;row++){
+            for(int col=0;col<colLen;col++)
+                visitFlag[row][col] = false;
+        }
+        return movingCountCore(threshold,rowLen,colLen,0,0,visitFlag);
+    }
+    public static int movingCountCore(int threshold,int rowLen,int colLen,int row,int col,boolean[][] visitFlag){
+        int count = 0;
+        if(canGetIn(threshold,rowLen,colLen,row,col,visitFlag)){
+            visitFlag[row][col] = true;
+            count = 1+movingCountCore(threshold,rowLen,colLen,row-1,col,visitFlag)+
+                    movingCountCore(threshold,rowLen,colLen,row+1,col,visitFlag)+
+                    movingCountCore(threshold,rowLen,colLen,row,col-1,visitFlag)+
+                    movingCountCore(threshold,rowLen,colLen,row,col+1,visitFlag);
+        }
+        return count;
+    }
+    public static boolean canGetIn(int threshold,int rowLen,int colLen,int row,int col,boolean[][] visitFlag){
+        return row>=0 && col>=0 && row<rowLen
+                && col<colLen && !visitFlag[row][col]
+                && getDigitSum(row)+getDigitSum(col)<=threshold;
+    }
+    public static int getDigitSum(int number){
+        int sum=0;
+        while (number>0){
+            sum += number%10;
+            number/=10;
+        }
+        return sum;
+    }
+
+    public static void main(String[] args){
+        System.out.println(movingCount(0,3,4)); //1
+        System.out.println(movingCount(1,3,4)); //3
+        System.out.println(movingCount(9,2,20)); //36
+    }
+}
 ```
