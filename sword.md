@@ -1297,3 +1297,594 @@ public class P92_RobotMove {
     }
 }
 ```
+
+
+14. 剪绳子  
+
+题目要求：  
+给你一根长度为n的绳子，请把绳子剪成m段，记每段绳子长度为  k[0],k[1]...k[m-1],  
+求k[0]k[1]...k[m-1]的最大值。已知绳子长度n为整数，m>1(至少要剪一刀，不能不剪)，  
+k[0],k[1]...k[m-1]均要求为整数。  
+例如，绳子长度为8时，把它剪成3-3-2，得到最大乘积18；绳子长度为3时，把它剪成2-1，  
+得到最大乘积2。  
+
+我们定义长度为n的绳子剪切后的最大乘积为f(n),剪了一刀后,f(n)=max(f(i)*f(n-i));  
+假设n为10，第一刀之后分为了4-6，而6也可能再分成2-4（6的最大是3-3，但过程中还是  
+要比较2-4这种情况的），而上一步4-6中也需要求长度为4的问题的最大值，可见，各个子  
+问题之间是有重叠的，所以可以先计算小问题，存储下每个小问题的结果，逐步往上，求得  
+大问题的最优解。  
+
+上述算法的时间复杂度为o(n^2);但其实，可以使用贪婪算法在o(1)时间内得到答案：  
+n<5时，和动态规划一样特殊处理；n>=5时，尽可能多地剪长度为3的绳子，当剩下的绳子长  
+度为4时，剪成2-2；比如长度为13的绳子， 剪成3-3-3-2-2；贪婪算法虽然快，但一般都思  
+路奇特，可遇不可求。且面试官一般都会要求证明，数学功底要好 。  
+
+
+```java
+/**
+ * Created by ryder on 2017/7/5.
+ * 剪绳子
+ */
+public class P96_CuttingRope {
+    public static int maxCutting(int length){
+        if(length<2) return 0;
+        if(length==2)return 1;
+        if(length==3)return 2;
+        int[] dp = new int[length+1];
+        dp[0]=0;
+        dp[1]=1;
+        dp[2]=2;
+        dp[3]=3;
+        int max = 0;
+        int temp = 0;
+        for(int i=4;i<=length;i++){
+            max = 0;
+            for(int j=1;j<=i/2;j++){
+                temp = dp[j]*dp[i-j];
+                if(temp>max)
+                    max = temp;
+            }
+            dp[i] = max;
+        }
+        return dp[length];
+    }
+    public static void main(String[] args){
+        for(int i=2;i<10;i++){
+            System.out.println("长度为"+i+"的最大值->"+maxCutting(i));
+        }
+    }
+}
+```
+
+
+15. 位运算  
+
+题目要求：
+实现一个函数，输入一个int型整数，输出该数字在计算机中二进制表示形式的1的个数。  
+例如9->1001,输出2；-3->11111111111111111111111111111101,输出31。  
+
+解题思路：
+考查位运算，此题要注意负数的处理。首先要明确计算机中，数字是以补码的形式存储的，  
+原码反码补码不清楚的话请自己谷歌百度。其次，明确位运算符，与&，或|，非~，异或^,  
+<<左移位，>>带符号右移位，>>>无符号右移位(java有此符号，c++没有)
+
+解法一：将数字无符号右移，直到为0。  
+
+解法二：使用一个标记，初始为1，让标记值与原输入数字异或，然后标记值左移。解法一  
+是原数字右移，而解法二是标记左移，从java来看思路类似但换了个角度；但这个思路在  
+C++就很关键，因为C++中没有>>>运算符，只能用解法二。  
+
+解法三：没接触过的人应该会觉得比较新颖。对于二进制数有如下结论：【把一个整数减去1  
+之后再和原来的整数做位与运算，得到的结果相当于把原整数的二进制表示形式的最右边的  
+1变成0】。比如1001，执行一次上述结论，1001&1000=1000，将最右边的1改为了0；再执行  
+一次，1000&0111=0000，第二个1也改成了0。因此能执行几次该结论，就有几个1。  
+对于解法一二，都需要循环32次，判断每一个比特位是否为1，而解法三，循环次数等于比特  
+位为1的个数。时间上是有改进的。  
+
+```java
+/**
+ * Created by ryder on 2017/7/6.
+ * 二进制中的1的个数
+ */
+public class P100_NumberOf1InBinary {
+    public static int numberOfOne1(int n){
+        int count=0;
+        while(n!=0){
+            if((n&1)!=0)
+                count++;
+            n>>>=1;
+        }
+        return count;
+    }
+    public static int numberOfOne2(int n){
+        int count=0;
+        int flag=1;
+        while(flag!=0){
+            if((n&flag)!=0)
+                count++;
+            flag<<=1;
+        }
+        return count;
+    }
+    public static int numberOfOne3(int n){
+        int count=0;
+        while(n!=0){
+            n = n&(n-1);
+            count++;
+        }
+        return count;
+    }
+    public static void main(String[] args){
+        System.out.println(numberOfOne1(3));
+        System.out.println(numberOfOne1(-3));
+        System.out.println(numberOfOne2(3));
+        System.out.println(numberOfOne2(-3));
+        System.out.println(numberOfOne3(3));
+        System.out.println(numberOfOne3(-3));
+    }
+}
+
+```
+
+16. 数值的整数次方  
+
+题目要求：  
+实现函数double power（double base，int exponent），求base的exponent次方。  
+不能使用库函数，不需要考虑大数问题。  
+
+解题思路：本题考查考虑问题的完整性。如下几个点要注意：  
+要考虑一些特殊情况，如指数为负、指数为负且底数为0、0的0次方要定义为多少。  
+底数为0的定义。对于一个double类型的数，判断它与另一个数是否相等，不能用“==”，  
+一般都需要一个精度，见下面的equal函数。  
+对于报错的情况，比如0的负数次方，要如何处理。书中提了三种错误处理方法：用函数  
+返回值来提示错误；用一个全局变量来提示错误；抛出异常；三种方法优缺点比较如下  
+
+错误处理方法             优点                        缺点  
+返回值           和相关函数的API一致          不能方便地使用计算结果  
+全局变量        能够方便地使用计算结果       用户可能忘记检查全局变量  
+异常        可自定义异常类型，逻辑清晰明了   抛出异常时对性能有负面影响  
+
+```java
+/**
+ * Created by ryder on 2017/7/6.
+ * 数值的整数次方
+ */
+public class P110_Power {
+    static boolean invalidInput = false;
+    public static double power(double base,int exponent){
+        //0的0次方在数学上没有意义，为了方便也返回1，也可特殊处理
+        if(exponent==0)
+            return 1;
+        if(exponent<0){
+            if(equal(base,0)){
+               //通过全局变量报错
+                invalidInput = true;
+                return 0;
+            }
+            else
+                return 1.0/powerWithPositiveExponent(base,-1*exponent);
+        }
+        else
+            return powerWithPositiveExponent(base,exponent);
+    }
+    public static boolean equal(double x,double y){
+       return -0.00001<x-y && x-y<0.00001;
+    }
+    public static double powerWithPositiveExponent(double base,int exponent){
+        if(exponent==0)
+            return 1;
+        else if((exponent&1)==0){
+            double temp = powerWithPositiveExponent(base,exponent>>1);
+            return temp*temp;
+        }
+        else{
+            double temp = powerWithPositiveExponent(base,exponent>>1);
+            return base*temp*temp;
+        }
+    }
+    public static void main(String[] args){
+        System.out.println("2^3="+power(2,3)+"\t是否报错:"+invalidInput);
+        System.out.println("2^-3="+power(2,-3)+"\t是否报错:"+invalidInput);
+        System.out.println("0^3="+power(0,3)+"\t是否报错:"+invalidInput);
+        System.out.println("0^-3="+power(0,-3)+"\t是否报错:"+invalidInput);
+    }
+}
+
+```
+
+
+17. 打印从1到最大的n位数  
+
+题目要求：  
+比如输入2，打印1,2......98,99；  
+
+解题思路：  
+此题需要考虑大数问题。本帖是使用字符串模拟数字的加法。  
+
+```java
+/**
+ * Created by ryder on 2017/7/6.
+ *
+ */
+public class P114_Print1ToMaxOfNDigits {
+    //在字符串上模拟加法
+    public static void print1ToMaxOfNDigits(int num){
+        if(num<=0)
+            return;
+        StringBuilder number = new StringBuilder(num);
+        for(int i=0;i<num;i++)
+            number.append('0');
+        while(increment(number)){
+            printNumber(number);
+        }
+    }
+    public static boolean increment(StringBuilder str){
+        for(int i=str.length()-1;i>=0;i--){
+            if(str.charAt(i)<'9' && str.charAt(i)>='0'){
+                str.setCharAt(i,(char)(str.charAt(i)+1));
+                return true;
+            }
+            else if(str.charAt(i)=='9'){
+                str.setCharAt(i,'0');
+            }
+            else{
+                return false;
+            }
+        }
+        return false;
+    }
+    public static void printNumber(StringBuilder number){
+        boolean flag = false;
+        for(int i=0;i<number.length();i++){
+            if(flag)
+                System.out.print(number.charAt(i));
+            else{
+                if(number.charAt(i)!='0'){
+                    flag = true;
+                    System.out.print(number.charAt(i));
+                }
+            }
+        }
+        System.out.println();
+    }
+    public static void main(String[] args){
+        print1ToMaxOfNDigits(2);
+    }
+}
+```
+
+
+18. 删除链表的节点  
+
+题目要求：  
+在o(1)时间内删除单链表的节点。  
+
+解题思路：  
+直接删除单链表某一节点，无法在o(1)时间得到该节点的前一个节点，  
+因此无法完成题目要求。可以将欲删节点的后一个节点的值拷贝到欲删  
+节点之上，删除欲删节点的后一个节点，从而可以在o(1)时间内完成  
+删除。（对于尾节点，删除仍然需要o(n),其他点为o(1)，因此平均时  
+间复杂度为o(1)，满足要求）  
+
+```java
+package structure;
+/**
+ * Created by ryder on 2017/6/13.
+ */
+public class ListNode<T> {
+    public T val;
+    public ListNode<T> next;
+    public ListNode(T val){
+        this.val = val;
+        this.next = null;
+    }
+    @Override
+    public String toString() {
+        StringBuilder ret = new StringBuilder();
+        ret.append("[");
+        for(ListNode cur = this;;cur=cur.next){
+            if(cur==null){
+                ret.deleteCharAt(ret.lastIndexOf(" "));
+                ret.deleteCharAt(ret.lastIndexOf(","));
+                break;
+            }
+            ret.append(cur.val);
+            ret.append(", ");
+        }
+        ret.append("]");
+        return ret.toString();
+    }
+}
+package chapter3;
+import structure.ListNode;
+/**
+ * Created by ryder on 2017/7/7.
+ * o(1)时间删除链表的节点
+ */
+public class P119_DeleteNodeInList {
+    public static ListNode<Integer> deleteNode(ListNode<Integer> head,ListNode<Integer> node){
+        if(node==head){
+            return head.next;
+        }
+        else if(node.next!=null){
+            node.val = node.next.val;
+            node.next = node.next.next;
+            return head;
+        }
+        else{
+            ListNode<Integer> temp=head;
+            while(temp.next!=node)
+                temp = temp.next;
+            temp.next = null;
+            return head;
+        }
+    }
+    public static void main(String[] args){
+        ListNode<Integer> head = new ListNode<>(1);
+        ListNode<Integer> node2 = new ListNode<>(2);
+        ListNode<Integer> node3 = new ListNode<>(3);
+        head.next = node2;
+        node2.next = node3;
+        System.out.println(head);
+        head = deleteNode(head,node3);
+        System.out.println(head);
+        head = deleteNode(head,head);
+        System.out.println(head);
+    }
+}
+```
+
+
+18. 题目二：删除排序链表中重复的节点  
+
+题目要求：  
+比如[1,2,2,3,3,3],删除之后为[1];  
+
+解题思路：  
+由于是已经排序好的链表，需要确定重复区域的长度，删除后还需要将被删去的前与后连接，  
+所以需要三个节点pre,cur,post，cur-post为重复区域，删除后将pre与post.next连接即可。  
+此外，要注意被删结点区域处在链表头部的情况，因为需要修改head。  
+
+```java
+package structure;
+/**
+ * Created by ryder on 2017/6/13.
+ */
+public class ListNode<T> {
+    public T val;
+    public ListNode<T> next;
+    public ListNode(T val){
+        this.val = val;
+        this.next = null;
+    }
+    @Override
+    public String toString() {
+        StringBuilder ret = new StringBuilder();
+        ret.append("[");
+        for(ListNode cur = this;;cur=cur.next){
+            if(cur==null){
+                ret.deleteCharAt(ret.lastIndexOf(" "));
+                ret.deleteCharAt(ret.lastIndexOf(","));
+                break;
+            }
+            ret.append(cur.val);
+            ret.append(", ");
+        }
+        ret.append("]");
+        return ret.toString();
+    }
+}
+package chapter3;
+
+import structure.ListNode;
+
+/**
+ * Created by ryder on 2017/7/7.
+ * 删除排序链表中的重复节点
+ */
+public class P122_deleteDuplicatedNode {
+    public static ListNode<Integer> deleteDuplication(ListNode<Integer> head){
+        if(head==null||head.next==null)
+            return head;
+        ListNode<Integer> pre = null;
+        ListNode<Integer> cur = head;
+        ListNode<Integer> post = head.next;
+        boolean needDelete = false;
+        while (post!=null){
+            if(cur.val.equals(post.val)){
+                needDelete = true;
+                post=post.next;
+            }
+            else if(needDelete && !cur.val.equals(post.val)){
+                if(pre==null)
+                    head = post;
+                else
+                    pre.next=post;
+                cur = post;
+                post = post.next;
+                needDelete = false;
+            }
+            else{
+                pre = cur;
+                cur = post;
+                post = post.next;
+            }
+        }
+        if(needDelete && pre!=null)
+            pre.next = null;
+        else if(needDelete && pre==null)
+            head = null;
+        return head;
+    }
+    public static void main(String[] args){
+        ListNode<Integer> head = new ListNode<>(1);
+        head.next= new ListNode<>(1);
+        head.next.next = new ListNode<>(2);
+        head.next.next.next = new ListNode<>(2);
+        head.next.next.next.next = new ListNode<>(2);
+        head.next.next.next.next.next = new ListNode<>(3);
+        System.out.println(head);
+        head = deleteDuplication(head);
+        System.out.println(head);
+    }
+}
+```
+
+19. 正则表达式匹配  
+
+题目要求：  
+实现正则表达式中.和*的功能。.表示任意一个字符，*表示他前面的字符的任意次（含0次）。  
+比如aaa与a.a和ab*ac*a匹配，但与aa.a和ab*a不匹配。  
+
+解题思路：  
+.就相当于一个万能字符，正常匹配即可；但*的匹配会涉及到前一个字符。所以要分模式串后  
+一个字符不是*或没有后一个字符，模式串后一个字符是*这几个大的情况，之再考虑.的问题。  
+
+```java
+package chapter3;
+/**
+ * Created by ryder on 2017/7/13.
+ * 正则表达式匹配
+ * 完成.(任何一个字符)和*(前面字符的任意次数)
+ */
+public class P124_RegularExpressionsMatching {
+    public static boolean match(String str,String pattern){
+        if(str==null || pattern==null)
+            return false;
+        return matchCore(new StringBuilder(str),0,new StringBuilder(pattern),0);
+    }
+    public static boolean matchCore(StringBuilder str,Integer strIndex,StringBuilder pattern, Integer patternIndex){
+        //如果匹配串和模式串都匹配结束
+        if(strIndex==str.length() && patternIndex==pattern.length())
+            return true;
+        if(strIndex!=str.length() && patternIndex==pattern.length())
+            return false;
+        if(strIndex==str.length() && patternIndex!=pattern.length()) {
+            if(patternIndex+1<pattern.length()&&pattern.charAt(patternIndex+1)=='*')
+                return matchCore(str,strIndex,pattern,patternIndex+2);
+            else
+                return false;
+        }
+        //如果模式串的第二个字符不是*或者已经只剩一个字符了
+        if(patternIndex==pattern.length()-1|| pattern.charAt(patternIndex+1)!='*'){
+            if(pattern.charAt(patternIndex)=='.' || pattern.charAt(patternIndex)==str.charAt(strIndex))
+                return matchCore(str,strIndex+1,pattern,patternIndex+1);
+            else
+                return false;
+        }
+        //如果模式串的第二个字符是*
+        else{
+            if(pattern.charAt(patternIndex)=='.'||pattern.charAt(patternIndex)==str.charAt(strIndex))
+                return matchCore(str,strIndex+1,pattern,patternIndex)
+                        ||matchCore(str,strIndex+1,pattern,patternIndex+2)
+                        ||matchCore(str,strIndex,pattern,patternIndex+2);
+            else
+                return matchCore(str,strIndex,pattern,patternIndex+2);
+        }
+    }
+    public static void main(String[] args){
+        System.out.println(match("aaa","a.a"));//true
+        System.out.println(match("aaa","ab*ac*a"));//true
+        System.out.println(match("aaa","aa.a"));//false
+        System.out.println(match("aaa","ab*a"));//false
+    }
+}
+```
+
+20. 表示数值的字符串  
+
+题目要求：  
+判断一个字符串是否表示数值，如+100,5e2，-123，-1E-16都是，  
+12e，1e3.14，+-5,1.2.3,12e+5.4都不是。  
+提示：表示数值的字符串遵循模式A[.[B]][e|EC] 或者 .B[e|EC];  
+A,B,C表示整数，|表示或。[]表示可有可无。  
+
+解题思路：  
+此题也没有没什么特殊思路，就按照A[.[B]][e|EC] 或者 .B[e|EC];  
+A,B,C这两种模式匹配下即可。  
+
+```java
+package chapter3;
+/**
+ * Created by ryder on 2017/7/13.
+ * 表示数值的字符串
+ */
+public class P127_NumberStrings {
+    public static boolean isNumeric(String str){
+        //正确的形式：A[.[B]][e|EC] 或者 .B[e|EC];
+        if(str==null||str.length()==0)
+            return false;
+        int index;
+        if(str.charAt(0)!='.'){
+            index = scanInteger(str,0);
+            if(index==-1)
+                return false;
+            if(index==str.length())
+                return true;
+            if(str.charAt(index)=='.'){
+                if(index==str.length()-1)
+                    return true;
+                index = scanInteger(str,index+1);
+                if(index==str.length())
+                    return true;
+            }
+            if(str.charAt(index)=='e'||str.charAt(index)=='E'){
+                index = scanInteger(str,index+1);
+                if(index==str.length())
+                    return true;
+                else
+                    return false;
+            }
+            return false;
+        }
+        else{
+            index = scanInteger(str,1);
+            if(index==-1)
+                return false;
+            if(index==str.length())
+                return true;
+            if(str.charAt(index)=='e'||str.charAt(index)=='E'){
+                index = scanInteger(str,index+1);
+                if(index==str.length())
+                    return true;
+            }
+            return false;
+
+        }
+
+    }
+    public static int scanInteger(String str,Integer index){
+        if(index>=str.length())
+            return -1;
+        if(str.charAt(index)=='+'||str.charAt(index)=='-')
+            return scanUnsignedInteger(str,index+1);
+        else
+            return scanUnsignedInteger(str,index);
+    }
+    public static int scanUnsignedInteger(String str,Integer index){
+        int origin = index;
+        while(str.charAt(index)>='0'&&str.charAt(index)<='9'){
+            index++;
+            if(index==str.length())
+                return index;
+        }
+        if(origin==index)
+            index = -1;
+        return index;
+    }
+    public static void main(String[] args){
+        System.out.println(isNumeric("+100"));//true
+        System.out.println(isNumeric("5e2")); //true
+        System.out.println(isNumeric("-123"));//true
+        System.out.println(isNumeric("3.1416"));//true
+        System.out.println(isNumeric("-1E-16"));//true
+        System.out.println(isNumeric(".6"));//true
+        System.out.println(isNumeric("6."));//true
+        System.out.println(isNumeric("12e"));//false
+        System.out.println(isNumeric("1a3.14"));//false
+        System.out.println(isNumeric("1.2.3"));//false
+        System.out.println(isNumeric("+-5"));//false
+        System.out.println(isNumeric("12e+5.4"));//false
+    }
+}
+```
