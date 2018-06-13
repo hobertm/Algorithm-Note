@@ -1473,7 +1473,7 @@ public class P110_Power {
     public static double powerWithPositiveExponent(double base,int exponent){
         if(exponent==0)
             return 1;
-        else if((exponent&1)==0){
+        else if((exponent&1)==0){//为偶数
             double temp = powerWithPositiveExponent(base,exponent>>1);
             return temp*temp;
         }
