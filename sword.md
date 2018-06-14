@@ -1774,10 +1774,12 @@ public class P124_RegularExpressionsMatching {
         }
         //如果模式串的第二个字符是*
         else{
+            //模式和当前字符匹配上
             if(pattern.charAt(patternIndex)=='.'||pattern.charAt(patternIndex)==str.charAt(strIndex))
-                return matchCore(str,strIndex+1,pattern,patternIndex)
-                        ||matchCore(str,strIndex+1,pattern,patternIndex+2)
-                        ||matchCore(str,strIndex,pattern,patternIndex+2);
+                return matchCore(str,strIndex+1,pattern,patternIndex)     //*匹配多个相同字符
+                        ||matchCore(str,strIndex+1,pattern,patternIndex+2)//*只匹配当前字符
+                        ||matchCore(str,strIndex,pattern,patternIndex+2); //*一个字符都不匹配
+            //模式和当前字符没有匹配上
             else
                 return matchCore(str,strIndex,pattern,patternIndex+2);
         }
@@ -1887,4 +1889,1406 @@ public class P127_NumberStrings {
         System.out.println(isNumeric("12e+5.4"));//false
     }
 }
+```
+
+21. 调整数组顺序使奇数位于偶数前面  
+
+题目要求：  
+实现一个函数来调整数组中的数字，使得所有奇数位于数组的前半部分，偶数位于后半部分。  
+
+解题思路：  
+其实我想到的第一个思路就是用双指针从两端向中间扫描，处理过程与快排很相似，时间复杂度o(n)  ，这应该是最快的解法了。思路简单，就当复习下快排吧。至于复杂度更高的解法，我就不再写了。  
+书中提到了一点，是将判断部分写成函数，这样能够提升代码的可扩展性，这的确是很好的一个提醒。  
+那样处理之后，这一类问题（非负数在前，负数在后；能被3整除的在前，不能的在后；）都只需修改  
+下判断函数即可解决。  
+
+```java
+package chapter3;
+/**
+ * Created by ryder on 2017/7/14.
+ * 调整数组顺序使奇数位于偶数前面
+ */
+public class P129_ReorderArray {
+    public static void reorder(int[] data){
+        if(data==null||data.length<2)
+            return;
+        int left=0,right=data.length-1;
+        while(left<right){
+            while (left<right&&!isEven(data[left]))
+                left++;
+            while (left<right&&isEven(data[right]))
+                right--;
+            if(left<right){
+                int temp=data[left];
+                data[left]=data[right];
+                data[right]=temp;
+            }
+        }
+    }
+    public static boolean isEven(int n){
+        return (n&1)==0;
+    }
+    public static void main(String[] args){
+        int[] data = {1,2,3,4,5,7,7};
+        reorder(data);
+        for(int i=0;i<data.length;i++) {
+            System.out.print(data[i]);
+            System.out.print('\t');
+        }
+        System.out.println();
+    }
+}
+```
+
+
+22. 链表中倒数第k个节点  
+
+题目要求：  
+求链表中倒数第k个节点。链表的尾节点定义为倒数第1个节点。  
+
+解题思路：  
+如果先求链表的长度，计算后再从头遍历，虽然时间复杂度是o(n),但需要两遍  
+扫描。更好的方式是使用两个距离为k的指针向右移动，这种方式只需扫描一遍。  
+chapter3主要考察细节，这道题也不例外。需要注意链表是否为空，链表长度  
+是否达到k，k是否是个正数。  
+
+```java
+package structure;
+/**
+ * Created by ryder on 2017/6/13.
+ */
+public class ListNode<T> {
+    public T val;
+    public ListNode<T> next;
+    public ListNode(T val){
+        this.val = val;
+        this.next = null;
+    }
+    @Override
+    public String toString() {
+        StringBuilder ret = new StringBuilder();
+        ret.append("[");
+        for(ListNode cur = this;;cur=cur.next){
+            if(cur==null){
+                ret.deleteCharAt(ret.lastIndexOf(" "));
+                ret.deleteCharAt(ret.lastIndexOf(","));
+                break;
+            }
+            ret.append(cur.val);
+            ret.append(", ");
+        }
+        ret.append("]");
+        return ret.toString();
+    }
+}
+package chapter3;
+import structure.ListNode;
+/**
+ * Created by ryder on 2017/7/14.
+ * 链表中倒数第k个节点
+ */
+public class P134_KthNodeFromEnd {
+    public static ListNode<Integer> findKthToTail(ListNode<Integer> head,int k){
+        if(head==null||k<=0)
+            return null;
+        ListNode<Integer> slow=head,fast=head;
+        for(int i=0;i<k;i++){
+            //i==k-1,第三个测试例通不过
+            if(fast.next!=null || i==k-1)
+                fast = fast.next;
+            else
+                return null;
+        }
+        while(fast!=null){
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return slow;
+    }
+    public static void main(String[] args){
+        ListNode<Integer> head = new ListNode<>(1);
+        head.next= new ListNode<>(2);
+        head.next.next = new ListNode<>(3);
+        System.out.println(findKthToTail(head,1).val);
+        System.out.println(findKthToTail(head,2).val);
+        System.out.println(findKthToTail(head,3).val);
+        System.out.println(findKthToTail(head,4));
+    }
+}
+```
+
+23. 链表中环的入口节点  
+
+题目要求：  
+假设一个链表中包含环，请找出入口节点。若没有环则返回null。  
+
+解题思路：  
+当然可以使用遍历。顺序访问，当第二次访问同一个节点时，  
+那么那个节点就是入口节点。不过这种解法需要o(n)的空间。  
+能不能把空间降为o(1)，时间依旧为o(n)。当然可以。这种  
+解法的思路是：首先申请两个指针，快指针一次前进两步，  
+慢指针一次前进一步，初始化都再链表头部。然后开始移动，  
+如果他们指向了同一个节点，则证明有环，否则没环。当他  
+们指向了同一个节点时，慢指针再次初始化，指向头结点。  
+快慢指针前进步数都改为1，当他们再次指向同一个节点，  
+这个节点就是环的入口节点。不明白的话请先看证明过程链  
+接,然后再看我说的思路总结。  
+
+
+```cpp 
+#include <stdio.h>
+
+struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode(int x) : val(x), next(NULL) {}
+};
+
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        ListNode *fast = head;
+        ListNode *slow = head;
+        ListNode *meet = NULL;
+        while(fast){
+            slow = slow->next;           //先各走一步
+            fast = fast->next;
+            if (!fast){                  //fast到链表尾，就说明没有环，结点为奇数个
+                return NULL;
+            }
+            fast = fast->next;           //fast再走一步
+            if (fast == slow){           //记录相遇位置
+                meet = fast;
+                break;
+            }
+        }
+
+        while(head && meet){          //head和meet相遇就是环起点
+            if (head == meet){
+                return head;
+            }
+            head = head->next;
+            meet = meet->next;
+        }
+        return NULL;
+    }
+};
+
+int main(){
+    ListNode a(1);
+    ListNode b(2);
+    ListNode c(3);
+    ListNode d(4);
+    ListNode e(5);
+    ListNode f(6);
+    ListNode g(7);
+    a.next = &b;
+    b.next = &c;
+    c.next = &d;
+    d.next = &e;
+    e.next = &f;
+    f.next = &g;
+    g.next = &c;
+    Solution solve;
+    ListNode *node = solve.detectCycle(&a);
+    if (node){
+        printf("%d\n", node->val);
+    }
+    else{
+        printf("NULL\n");
+    }
+    return 0;
+}
+
+```
+
+
+24. 反转链表  
+
+解题思路：  
+想要链表反转时不断裂，至少需要3个变量记录，pre，cur，post。与前面的题目类似，  
+初始化pre为null，cur为head，post为head.next。初始化之前要注意检查链表的长度。  
+
+```java
+package structure;
+/**
+ * Created by ryder on 2017/6/13.
+ */
+public class ListNode<T> {
+    public T val;
+    public ListNode<T> next;
+    public ListNode(T val){
+        this.val = val;
+        this.next = null;
+    }
+    @Override
+    public String toString() {
+        StringBuilder ret = new StringBuilder();
+        ret.append("[");
+        for(ListNode cur = this;;cur=cur.next){
+            if(cur==null){
+                ret.deleteCharAt(ret.lastIndexOf(" "));
+                ret.deleteCharAt(ret.lastIndexOf(","));
+                break;
+            }
+            ret.append(cur.val);
+            ret.append(", ");
+        }
+        ret.append("]");
+        return ret.toString();
+    }
+}
+package chapter3;
+import structure.ListNode;
+/**
+ * Created by ryder on 2017/7/14.
+ * 反转链表
+ */
+public class P142_ReverseList {
+    public static ListNode<Integer> reverseList(ListNode<Integer> head){
+        if(head==null || head.next==null)
+            return head;
+        ListNode<Integer> pre = null;
+        ListNode<Integer> cur = head;
+        ListNode<Integer> post = head.next;
+        while(true){
+            cur.next = pre;
+            pre = cur;
+            cur = post;
+            if(post!=null)
+                post = post.next;
+            else
+                return pre;
+        }
+    }
+    public static void main(String[] args){
+        ListNode<Integer> head = new ListNode<>(1);
+        head.next= new ListNode<>(2);
+        head.next.next = new ListNode<>(3);
+        System.out.println(head);
+        head = reverseList(head);
+        System.out.println(head);
+    }
+}
+```
+
+
+25. 合并两个排序的链表  
+
+题目要求：  
+输入两个递增排序的链表，要求合并后保持递增。  
+
+解题思路：  
+这个题目是二路链表归并排序的一部分，或者说是最关键的归并函数部分。熟悉归并排序  
+的话做这个题应该很容易。思路很简单，注意链表的next指针，初始条件，结束条件即可。  
+
+```java
+package structure;
+/**
+ * Created by ryder on 2017/6/13.
+ */
+public class ListNode<T> {
+    public T val;
+    public ListNode<T> next;
+    public ListNode(T val){
+        this.val = val;
+        this.next = null;
+    }
+    @Override
+    public String toString() {
+        StringBuilder ret = new StringBuilder();
+        ret.append("[");
+        for(ListNode cur = this;;cur=cur.next){
+            if(cur==null){
+                ret.deleteCharAt(ret.lastIndexOf(" "));
+                ret.deleteCharAt(ret.lastIndexOf(","));
+                break;
+            }
+            ret.append(cur.val);
+            ret.append(", ");
+        }
+        ret.append("]");
+        return ret.toString();
+    }
+}
+package chapter3;
+import structure.ListNode;
+/**
+ * Created by ryder on 2017/7/14.
+ * 合并两个排序的链表
+ */
+public class P145_MergeSortedLists {
+    public static ListNode<Integer> merge(ListNode<Integer> head1,ListNode<Integer> head2){
+        if(head1==null)
+            return head2;
+        if(head2==null)
+            return head1;
+       ListNode<Integer> index1 = head1;
+       ListNode<Integer> index2 = head2;
+       ListNode<Integer> index = null;
+       if(index1.val<index2.val) {
+           index = index1;
+           index1 = index1.next;
+       }
+       else {
+           index = index2;
+           index2 = index2.next;
+       }
+       while(index1!=null && index2!=null){
+           if(index1.val<index2.val) {
+               index.next = index1;
+               index = index.next;
+               index1 = index1.next;
+           }
+           else {
+               index.next = index2;
+               index = index.next;
+               index2 = index2.next;
+           }
+       }
+       if(index1!=null)
+           index.next = index1;
+       else
+           index.next = index2;
+       return head1.val<head2.val?head1:head2;
+    }
+    public static void main(String[] args){
+        ListNode<Integer> head1 = new ListNode<>(1);
+        head1.next= new ListNode<>(3);
+        head1.next.next = new ListNode<>(5);
+        head1.next.next.next = new ListNode<>(7);
+        ListNode<Integer> head2 = new ListNode<>(2);
+        head2.next= new ListNode<>(4);
+        head2.next.next = new ListNode<>(6);
+        head2.next.next.next = new ListNode<>(8);
+        System.out.println(head1);
+        System.out.println(head2);
+        ListNode<Integer> head =merge(head1,head2);
+        System.out.println(head);
+    }
+}
+```
+
+26. 树的子结构  
+
+题目要求：  
+输入两棵二叉树A和B，判断B是不是A的子结构。  
+
+解题思路：  
+当A有一个节点与B的根节点值相同时，则需要从A的那个节点开始严格匹配，对应于下面的  
+tree1HasTree2FromRoot函数。如果匹配不成功，则返回到开始匹配的那个节点，对它的  
+左右子树继续判断是否与B的根节点值相同，重复上述过程。  
+
+```java
+package structure;
+/**
+ * Created by ryder on 2017/6/12.
+ * 树节点
+ */
+public class TreeNode<T> {
+    public T val;
+    public TreeNode<T> left;
+    public TreeNode<T> right;
+    public TreeNode(T val){
+        this.val = val;
+        this.left = null;
+        this.right = null;
+    }
+}
+package chapter3;
+import structure.TreeNode;
+/**
+ * Created by ryder on 2017/7/14.
+ * 树的子结构
+ */
+public class P148_SubstructureInTree {
+    public static boolean hasSubtree(TreeNode<Integer> root1, TreeNode<Integer> root2){
+        if(root2==null)
+            return true;
+        if(root1==null)
+            return false;
+        if(root1.val.equals(root2.val)){
+            if(tree1HasTree2FromRoot(root1,root2))
+                return true;
+        }
+        return hasSubtree(root1.left,root2) || hasSubtree(root1.right,root2);
+    }
+    public static boolean tree1HasTree2FromRoot(TreeNode<Integer> root1, TreeNode<Integer> root2){
+        if(root2==null)
+            return true;
+        if(root1==null)
+            return false;
+        if(root1.val.equals(root2.val) && tree1HasTree2FromRoot(root1.left,root2.left) && tree1HasTree2FromRoot(root1.right,root2.right))
+            return true;
+        else
+            return false;
+
+    }
+    public static void main(String[] args){
+        TreeNode<Integer> root1 = new TreeNode<>(8);
+        root1.left = new TreeNode<>(8);
+        root1.right = new TreeNode<>(7);
+        root1.left.left = new TreeNode<>(9);
+        root1.left.right = new TreeNode<>(2);
+        root1.left.right.left = new TreeNode<>(4);
+        root1.left.right.right = new TreeNode<>(7);
+        TreeNode<Integer> root2 = new TreeNode<>(8);
+        root2.left = new TreeNode<>(9);
+        root2.right = new TreeNode<>(2);
+        TreeNode<Integer> root3 = new TreeNode<>(2);
+        root3.left = new TreeNode<>(4);
+        root3.right = new TreeNode<>(3);
+        System.out.println(hasSubtree(root1,root2));
+        System.out.println(hasSubtree(root1,root3));
+    }
+}
+```
+
+27. 二叉树的镜像  
+
+题目要求：  
+求一棵二叉树的镜像。  
+
+解题思路：  
+二叉树的镜像，即左右子树调换。从上到下，递归完成即可。  
+
+```java
+package structure;
+import java.util.LinkedList;
+import java.util.Queue;
+/**
+ * Created by ryder on 2017/6/12.
+ * 树节点
+ */
+public class TreeNode<T> {
+    public T val;
+    public TreeNode<T> left;
+    public TreeNode<T> right;
+    public TreeNode(T val){
+        this.val = val;
+        this.left = null;
+        this.right = null;
+    }
+    //层序遍历
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("[");
+        Queue<TreeNode<T>> queue = new LinkedList<>();
+        queue.offer(this);
+        TreeNode<T> temp;
+        while(!queue.isEmpty()){
+            temp = queue.poll();
+            stringBuilder.append(temp.val);
+            stringBuilder.append(",");
+            if(temp.left!=null)
+                queue.offer(temp.left);
+            if(temp.right!=null)
+                queue.offer(temp.right);
+        }
+        stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
+        stringBuilder.append("]");
+        return stringBuilder.toString();
+    }
+}
+package chapter4;
+import structure.TreeNode;
+/**
+ * Created by ryder on 2017/7/15.
+ * 二叉树的镜像
+ */
+public class P151_MirrorOfBinaryTree {
+    public static void mirrorRecursively(TreeNode<Integer> root){
+        if(root==null)
+            return;
+        if(root.left==null&&root.right==null)
+            return;
+        TreeNode<Integer> temp = root.left;
+        root.left = root.right;
+        root.right = temp;
+        mirrorRecursively(root.left);
+        mirrorRecursively(root.right);
+    }
+    public static void main(String[] args){
+        TreeNode<Integer> root = new TreeNode<>(8);
+        root.left = new TreeNode<>(6);
+        root.right = new TreeNode<>(10);
+        root.left.left = new TreeNode<>(5);
+        root.left.right = new TreeNode<>(7);
+        root.right.left = new TreeNode<>(9);
+        root.right.right = new TreeNode<>(11);
+        System.out.println(root);
+        mirrorRecursively(root);
+        System.out.println(root);
+    }
+}
+```
+
+28：对称的二叉树  
+
+题目要求：  
+判断一棵二叉树是不是对称的。如果某二叉树与它的镜像一样，称它是对称的。  
+
+解题思路：  
+比较直接的思路是比较原树与它的镜像是否一样。书中就是用的这种方式  
+（比较二叉树的前序遍历和对称前序遍历）。但这种思路下，树的每个节  
+点都要读两次，也就是遍历两遍。  
+其实可以只遍历一次完成判断：我们可以通过判断待判断二叉树的左子树  
+与右子树是不是对称的来得知该二叉树是否是对称的。   
+
+```java
+package structure;
+import java.util.LinkedList;
+import java.util.Queue;
+/**
+ * Created by ryder on 2017/6/12.
+ * 树节点
+ */
+public class TreeNode<T> {
+    public T val;
+    public TreeNode<T> left;
+    public TreeNode<T> right;
+    public TreeNode(T val){
+        this.val = val;
+        this.left = null;
+        this.right = null;
+    }
+    //层序遍历
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("[");
+        Queue<TreeNode<T>> queue = new LinkedList<>();
+        queue.offer(this);
+        TreeNode<T> temp;
+        while(!queue.isEmpty()){
+            temp = queue.poll();
+            stringBuilder.append(temp.val);
+            stringBuilder.append(",");
+            if(temp.left!=null)
+                queue.offer(temp.left);
+            if(temp.right!=null)
+                queue.offer(temp.right);
+        }
+        stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
+        stringBuilder.append("]");
+        return stringBuilder.toString();
+    }
+}
+package chapter4;
+import structure.TreeNode;
+import java.util.LinkedList;
+import java.util.Queue;
+/**
+ * Created by ryder on 2017/7/15.
+ * 对称的二叉树
+ */
+public class P159_SymmetricalBinaryTree {
+    //递归实现
+    public static boolean isSymmetrical(TreeNode<Integer> root){
+        if(root==null)
+            return true;
+        if(root.left==null && root.right==null)
+            return true;
+        if(root.left==null || root.right==null)
+            return false;
+        return isSymmetrical(root.left,root.right);
+    }
+    public static boolean isSymmetrical(TreeNode<Integer> root1,TreeNode<Integer> root2){
+        if(root1==null && root2==null)
+            return true;
+        if(root1==null || root2==null)
+            return false;
+        if(!root1.val.equals(root2.val))
+            return false;
+        return isSymmetrical(root1.left,root2.right) && isSymmetrical(root1.right,root2.left);
+    }
+    //迭代实现
+    public static boolean isSymmetrical2(TreeNode<Integer> root){
+        if(root==null)
+            return true;
+        if(root.left==null && root.right==null)
+            return true;
+        if(root.left==null || root.right==null)
+            return false;
+        Queue<TreeNode<Integer>> queueLeft = new LinkedList<>();
+        Queue<TreeNode<Integer>> queueRight = new LinkedList<>();
+        queueLeft.offer(root.left);
+        queueRight.offer(root.right);
+        TreeNode<Integer> tempLeft,tempRight;
+        while(!queueLeft.isEmpty()|| !queueRight.isEmpty()){
+            tempLeft = queueLeft.poll();
+            tempRight = queueRight.poll();
+            if(tempLeft.val.equals(tempRight.val)){
+                if(tempLeft.left!=null)
+                    queueLeft.offer(tempLeft.left);
+                if(tempLeft.right!=null)
+                    queueLeft.offer(tempLeft.right);
+                if(tempRight.right!=null)
+                    queueRight.offer(tempRight.right);
+                if(tempRight.left!=null)
+                    queueRight.offer(tempRight.left);
+            }
+            else
+                return false;
+        }
+        if(queueLeft.isEmpty() && queueRight.isEmpty())
+            return true;
+        else
+            return false;
+    }
+    public static void main(String[] args){
+        TreeNode<Integer> root = new TreeNode<>(8);
+        root.left = new TreeNode<>(6);
+        root.right = new TreeNode<>(6);
+        root.left.left = new TreeNode<>(5);
+        root.left.right = new TreeNode<>(7);
+        root.right.left = new TreeNode<>(7);
+        root.right.right = new TreeNode<>(5);
+        System.out.println(isSymmetrical(root));
+        System.out.println(isSymmetrical2(root));
+    }
+}
+```
+
+29. 顺时针打印矩阵  
+
+题目要求：  
+输入一个矩阵，按照从外向里以顺时针的顺序一次打印出每一个数字。  
+如果输入如下矩阵：  
+
+1    2    3    4
+5    6    7    8
+9    10   11   12
+13   14   15   16
+则依次打印出1,2,3,4,8,12,16,15,14,13,9,5,6,7,11,10。
+
+解题思路：  
+此题的任务清晰明了，需要小心的是要考虑清楚边界情况。  
+上例中，环绕一次后，剩下的矩阵行数为2，列数为2，可以看成一个新的矩阵，  
+继续环绕打印。可见，此题可以用递归解决。
+示例中行数与列数是相等的，所以能够组成完整的环（完整指能够环绕一圈）；  
+其实，只要行数和列数中，比较小的那个是偶数，就能够组成完整的环。
+如果行数和列数中比较小的那个是奇数，则递归到终止前的剩余元素无法成环。  
+如果较小的是行数，则剩余元素的组成的形状类似于“|”；如果较小的是列数，  
+则剩余元素的组成的形状类似于“—”。
+因此，当未访问行数和未访问列数都大于等于2时，按照完整环的逻辑递归访问  
+即可。当不满足上述条件，判断剩余元素是“|”型还是“—”型，然后按照不完整环  
+的逻辑访问即可。  
+
+```java
+package chapter4;
+
+/**
+ * Created by ryder on 2017/7/16.
+ *
+ */
+public class P161_PrintMatrix {
+    public static void printMatrix(int[][] data){
+        if(data==null)
+            return ;
+        if(data.length==0||data[0].length==0)
+            return ;
+        int rowMax = data.length-1,rowLen = data.length;
+        int colMax =data[0].length-1,colLen = data[0].length;
+        int row=0,col=0,round=0;
+        while(rowLen-2*row>1 && colLen-2*col>1){
+            for(;col<=colMax-round;col++){
+                System.out.print(data[row][col]);
+                System.out.print("\t");
+            }
+            for(col=col-1,row=row+1;row<rowMax-round;row++){
+                System.out.print(data[row][col]);
+                System.out.print("\t");
+            }
+            for(;col>=round;col--){
+                System.out.print(data[row][col]);
+                System.out.print("\t");
+            }
+            for(col=col+1,row=row-1;row>round;row--){
+                System.out.print(data[row][col]);
+                System.out.print("\t");
+            }
+            row=row+1;
+            col=col+1;
+            round++;
+        }
+        //如果行数与列数中较小的那个是偶数，则能组成完整的环，在while中就完成了遍历
+        if(rowLen-2*row==0 || colLen-2*col==0){
+            System.out.println();
+        }
+        //如果行数与列数中较小的是行数，且是奇数，则还需补充访问一行
+        if(rowLen-2*row==1){
+            for(;col<=colMax-round;col++){
+                System.out.print(data[row][col]);
+                System.out.print("\t");
+            }
+            System.out.println();
+        }
+        //如果行数与列数中较小的是列数，且是奇数，则还需补充访问一列
+        if(colLen-2*col==1){
+            for(;row<=rowMax-round;row++){
+                System.out.print(data[row][col]);
+                System.out.print("\t");
+            }
+            System.out.println();
+        }
+
+    }
+    public static void main(String[] args){
+        int[][] data1={
+                {1,2,3,4},
+                {12,13,14,5},
+                {11,16,15,6},
+                {10,9,8,7},
+        };
+        int[][] data2={
+                {1,2,3,4},
+                {10,11,12,5},
+                {9,8,7,6},
+        };
+        int[][] data3={
+                {1,2,3},
+                {10,11,4},
+                {9,12,5},
+                {8,7,6},
+        };
+        int[][] data4={
+                {1,2,3},
+                {8,9,4},
+                {7,6,5},
+        };
+        printMatrix(data1);
+        printMatrix(data2);
+        printMatrix(data3);
+        printMatrix(data4);
+    }
+}
+```
+
+30. 包含min函数的栈  
+
+题目要求：  
+定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的min函数。  
+要求在该栈中，调用min，push及pop的时间复杂度都是o(1)。  
+
+解题思路：  
+期望获知当前栈的最小值，最直接的方法是全部弹出求最小值，然后再全部压入。  
+这种方式时间消耗较大。另一种思路，可以用空间换时间：自己实现一个栈，栈中  
+有记录数据的数据栈，同时也有记录最小值的min栈，本帖就是采用的此方法。记  
+得曾经看过一个更巧妙地方法，用一个变量来记录最小值，压入与弹出都会因一定  
+的规则修改该变量，思路比较精奇，可遇不可求，有兴趣的可以去搜搜看,比如:  
+http://www.cnblogs.com/javawebsoa/archive/2013/05/21/3091727.html  
+
+```java
+package chapter4;
+import java.util.Stack;
+/**
+ * Created by ryder on 2017/7/16.
+ * 包含min函数的栈
+ */
+public class P165_StackWithMin {
+    public static void main(String[] args){
+        StackWithMin<Integer> stack = new StackWithMin<>();
+        stack.push(3);
+        stack.push(4);
+        stack.push(2);
+        stack.push(1);
+        System.out.println(stack.min());
+        stack.pop();
+        System.out.println(stack.min());
+        stack.pop();
+        System.out.println(stack.min());
+        stack.pop();
+        System.out.println(stack.min());
+        stack.pop();
+        System.out.println(stack.min());
+    }
+}
+class StackWithMin<T extends Comparable>{
+    private Stack<T> stackData = new Stack<>();
+    private Stack<T> stackMin = new Stack<>();
+    public void push(T data){
+        stackData.push(data);
+        if(stackMin.isEmpty())
+            stackMin.push(data);
+        else{
+            T temp = stackMin.peek();
+            if(temp.compareTo(data)<0)
+                stackMin.push(temp);
+            else
+                stackMin.push(data);
+        }
+    }
+    public T pop(){
+        if(stackData.isEmpty())
+            return null;
+        stackMin.pop();
+        return stackData.pop();
+    }
+    public T min(){
+        if(stackMin.isEmpty())
+            return null;
+        return stackMin.peek();
+    }
+}
+```
+
+
+31. 栈的压入弹出序列  
+
+题目要求：  
+输入两个整数序列，第一个序列表示栈的压入顺序，判断第二个序列是否为该栈的弹出序序列。  
+假设压入栈的所有数字均不相等。例如，压入序列为(1,2,3,4,5)，序列(4,5,3,2,1)是它的  
+弹出序列，而(4,3,5,1,2)不是。  
+
+解题思路：  
+对于一个给定的压入序列，由于弹出的时机不同，会出现多种弹出序列。如果是选择题，依照后  
+进先出的原则，复现一下栈的压入弹出过程就很容易判断了。写成程序同样如此，主要步骤如下：  
+
+步骤1：栈压入序列第一个元素，弹出序列指针指弹出序列的第一个；  
+步骤2：判断栈顶元素是否等于弹出序列的第一个元素：  
+步骤2.1：如果不是，压入另一个元素，进行结束判断，未结束则继续执行步骤2；  
+步骤2.2：如果是，栈弹出一个元素，弹出序列指针向后移动一位，进行结束判断，  
+未结束则继续执行步骤2；  
+
+结束条件：如果弹出序列指针还没到结尾但已经无元素可压入，则被测序列不是弹出序列。  
+         如果弹出序列指针以判断完最后一个元素，则被测序列是弹出序列。  
+当然，进行判断前需要进行一些检查，比如传入参数是否为null，压入序列与弹出序列长度是否一致。  
+
+```java
+package chapter4;
+import java.util.Stack;
+/**
+ * Created by ryder on 2017/7/17.
+ * 栈的压入弹出序列
+ */
+public class P168_StackPushPopOrder {
+    public static boolean isPopOrder(int[] pushSeq,int[] popSeq){
+        if(pushSeq==null||popSeq==null||pushSeq.length!=popSeq.length)
+            return false;
+        Stack<Integer> stack = new Stack<>();
+        int pushSeqIndex=0,popSeqIndex=0;
+        while (popSeqIndex<popSeq.length){
+            if(stack.isEmpty()||stack.peek()!=popSeq[popSeqIndex]) {
+                if(pushSeqIndex<pushSeq.length)
+                    stack.push(pushSeq[pushSeqIndex++]);
+                else
+                    return false;
+            }
+            else{
+                stack.pop();
+                popSeqIndex++;
+            }
+        }
+        return true;
+    }
+    public static void main(String[] args){
+        int[] push = {1,2,3,4,5};
+        int[] pop1 = {4,5,3,2,1};
+        int[] pop2 = {4,3,5,1,2};
+        System.out.println(isPopOrder(push,pop1));
+        System.out.println(isPopOrder(push,pop2));
+    }
+}
+```
+
+
+32. 32.2分行从上到下打印二叉树  
+
+题目要求：  
+从上到下按层打印二叉树，同一层的节点按从左到右的顺序打印 ，每一层打印一行。  
+
+解题思路：  
+同样是层序遍历，与上一题不同的是，此处要记录每层的节点个数，在每层打印结束后多打印一个回车符。  
+
+```java
+package structure;
+import java.util.LinkedList;
+import java.util.Queue;
+/**
+ * Created by ryder on 2017/6/12.
+ * 树节点
+ */
+public class TreeNode<T> {
+    public T val;
+    public TreeNode<T> left;
+    public TreeNode<T> right;
+    public TreeNode(T val){
+        this.val = val;
+        this.left = null;
+        this.right = null;
+    }
+}
+package chapter4;
+import structure.TreeNode;
+import java.util.LinkedList;
+import java.util.Queue;
+/**
+ * Created by ryder on 2017/7/18.
+ * 分行从上到下打印二叉树
+ */
+public class P174_printTreeInLine {
+    public static void printTreeInLine(TreeNode<Integer> root){
+        if(root==null)
+            return;
+        Queue<TreeNode<Integer>> queue = new LinkedList<>();
+        queue.offer(root);
+        TreeNode<Integer> temp;
+        while (!queue.isEmpty()){
+            for(int size=queue.size();size>0;size--){
+                temp = queue.poll();
+                System.out.print(temp.val);
+                System.out.print("\t");
+                if(temp.left!=null)
+                    queue.offer(temp.left);
+                if(temp.right!=null)
+                    queue.offer(temp.right);
+            }
+            System.out.println();
+        }
+    }
+    public static void main(String[] args){
+        //            1
+        //          /   \
+        //         2     3
+        //       /  \   / \
+        //      4    5 6   7
+        TreeNode<Integer> root = new TreeNode<Integer>(1);
+        root.left = new TreeNode<Integer>(2);
+        root.right = new TreeNode<Integer>(3);
+        root.left.left = new TreeNode<Integer>(4);
+        root.left.right = new TreeNode<Integer>(5);
+        root.right.left = new TreeNode<Integer>(6);
+        root.right.right = new TreeNode<Integer>(7);
+        printTreeInLine(root);
+    }
+}
+```
+
+
+32. 32.3之字形打印二叉树  
+
+题目要求：
+请实现一个函数按照之字形打印二叉树。即第一层从左到右打印，第二层从右到左打印，  
+第三层继续从左到右，以此类推。  
+
+解题思路：  
+第k行从左到右打印，第k+1行从右到左打印，可以比较容易想到用两个栈来实现。  
+另外要注意，根据是从左到右还是从右到左访问的不同，压入左右子节点的顺序也有所不同。  
+
+```java
+package structure;
+import java.util.LinkedList;
+import java.util.Queue;
+/**
+ * Created by ryder on 2017/6/12.
+ * 树节点
+ */
+public class TreeNode<T> {
+    public T val;
+    public TreeNode<T> left;
+    public TreeNode<T> right;
+    public TreeNode(T val){
+        this.val = val;
+        this.left = null;
+        this.right = null;
+    }
+}
+package chapter4;
+import structure.TreeNode;
+import java.util.Stack;
+/**
+ * Created by ryder on 2017/7/18.
+ * 之字形打印二叉树
+ */
+public class P176_printTreeInSpecial {
+    public static void printTreeInSpeical(TreeNode<Integer> root){
+        if(root==null)
+            return;
+        Stack<TreeNode<Integer>> stack1 = new Stack<>();
+        Stack<TreeNode<Integer>> stack2 = new Stack<>();
+        TreeNode<Integer> temp;
+        stack1.push(root);
+        while(!stack1.isEmpty() || !stack2.isEmpty()){
+            if(!stack1.isEmpty()) {
+                while (!stack1.isEmpty()) {
+                    temp = stack1.pop();
+                    System.out.print(temp.val);
+                    System.out.print('\t');
+                    if (temp.left != null)
+                        stack2.push(temp.left);
+                    if (temp.right != null)
+                        stack2.push(temp.right);
+                }
+            }
+            else {
+                while (!stack2.isEmpty()) {
+                    temp = stack2.pop();
+                    System.out.print(temp.val);
+                    System.out.print('\t');
+                    if (temp.right != null)
+                        stack1.push(temp.right);
+                    if (temp.left != null)
+                        stack1.push(temp.left);
+                }
+            }
+            System.out.println();
+        }
+    }
+    public static void main(String[] args){
+        //            1
+        //          /   \
+        //         2     3
+        //       /  \   / \
+        //      4    5 6   7
+        TreeNode<Integer> root = new TreeNode<Integer>(1);
+        root.left = new TreeNode<Integer>(2);
+        root.right = new TreeNode<Integer>(3);
+        root.left.left = new TreeNode<Integer>(4);
+        root.left.right = new TreeNode<Integer>(5);
+        root.right.left = new TreeNode<Integer>(6);
+        root.right.right = new TreeNode<Integer>(7);
+        printTreeInSpeical(root);
+    }
+}
+```
+
+33. 二叉搜索树的后序遍历  
+
+题目要求：  
+输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果，假设输入数组的任意两个数都互不相同。  
+
+解题思路：  
+二叉搜索树的中序遍历是有序的，而此题是后序遍历。  
+后序遍历可以很容易找到根节点，然后根据二叉搜索树的性质（左子树小于根节点，右子树大于根节点），  
+可以将序列分为根节点的左子树部分与右子树部分，而后递归判断两个子树。  
+
+```java
+package chapter4;
+/**
+ * Created by ryder on 2017/7/18.
+ * 二叉搜索树的后序遍历序列
+ */
+public class P179_SequenceOfBST {
+    public static boolean verifySquenceOfBST(int[] data){
+        //空树
+        if(data==null||data.length==0)
+            return false;
+        return verifySquenceOfBST(data,0,data.length-1);
+    }
+    public static boolean verifySquenceOfBST(int[] data,int start,int end){
+        //数组长度为2，一定能够组成BST
+        if(end-start<=1)
+            return true;
+        int root = data[end];
+        int rightStart =0;
+        for(int i=0;i<end;i++){
+            if(data[i]>root){
+                rightStart = i;
+                break;
+            }
+        }
+        for(int i=rightStart;i<end;i++){
+            if(data[i]<root)
+                return false;
+        }
+        return verifySquenceOfBST(data,start,rightStart-1)&&verifySquenceOfBST(data,rightStart,end-1);
+    }
+    public static void main(String[] args){
+        //            8
+        //          /   \
+        //         6     10
+        //       /  \   / \
+        //      5    7 9   11
+        int[] data = {5,7,6,9,4,10,8};
+        int[] data1 = {5,7,6,9,11,10,8};
+        System.out.println(verifySquenceOfBST(data));
+        System.out.println(verifySquenceOfBST(data1));
+    }
+}
+```
+
+34. 二叉树中和为某一值的路径  
+
+题目要求：  
+输入一棵二叉树和一个整数，打印出二叉树中节点值的和为输入整数的所有路径。  
+从树的根节点开始往下一直到叶节点所经过的节点形成一条路径。  
+
+解题思路：  
+需要得到所有从根节点到叶节点的路径，判断和是否为给定值。自己写一个小的二叉树，  
+通过模拟上述过程，发现获取所有路径的过程与前序遍历类似。  
+因此，可以对给定二叉树进行前序遍历。当被访问节点时叶节点时，判断路径和是否为  
+给定值。此外，为了记录路径上的节点，需要一个数组。  
+
+```java
+package chapter4;
+import structure.TreeNode;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by ryder on 2017/7/18.
+ * 二叉树中和为某一值的路径
+ */
+public class P182_FindPath {
+    //用类似于前序遍历的思路解决
+    public static void findPath(TreeNode<Integer> root,int exceptedSum){
+        if(root==null)
+            return;
+        List<Integer> path = new ArrayList<>();
+        findPath(root,path,exceptedSum,0);
+    }
+    //curNode为将要被访问的节点，还未被加入到path中
+    public static void findPath(TreeNode<Integer> curNode,List<Integer> path,int exceptedSum,int currentSum){
+        path.add(curNode.val);
+        currentSum+=curNode.val;
+        if(curNode.left!=null)
+            findPath(curNode.left,path,exceptedSum,currentSum);
+        if(curNode.right!=null)
+            findPath(curNode.right,path,exceptedSum,currentSum);
+        if(curNode.left==null && curNode.right==null && currentSum==exceptedSum)
+            System.out.println(path);
+        path.remove(path.size()-1) ;
+    }
+   
+    public static void main(String[] args) {
+        //            10
+        //          /   \
+        //         5     12
+        //       /  \
+        //      4    7
+        TreeNode<Integer> root = new TreeNode<Integer>(10);
+        root.left = new TreeNode<Integer>(5);
+        root.right = new TreeNode<Integer>(12);
+        root.left.left = new TreeNode<Integer>(4);
+        root.left.right = new TreeNode<Integer>(7);
+        findPath(root,22);
+        findPath2(root,22);
+    }
+}
+如果二叉树的所有节点值都是大于0的（原题中并没有这个条件），可以进行剪枝。
+
+//如果所有节点值均大于0，可进行剪枝
+    public static void findPath2(TreeNode<Integer> root,int exceptedSum){
+        if(root==null)
+            return;
+        List<Integer> path = new ArrayList<>();
+        findPath2(root,path,exceptedSum,0);
+    }
+     //curNode为将要被访问的节点，还未被加入到path中
+    public static void findPath2(TreeNode<Integer> curNode,List<Integer> path,int exceptedSum,int currentSum){
+        path.add(curNode.val);
+        currentSum+=curNode.val;
+        //只有当currentSum小于exceptedSum时需要继续当前节点的子节点的遍历
+        if(currentSum<exceptedSum){
+            if(curNode.left!=null)
+                findPath2(curNode.left,path,exceptedSum,currentSum);
+            if(curNode.right!=null)
+                findPath2(curNode.right,path,exceptedSum,currentSum);
+        }
+        //currentSum大于等于exceptedSum时可以直接停止当前分支的遍历，因为当前分支下currentSum只会越来越大，不会再有符合要求的解
+        else if(currentSum==exceptedSum && curNode.left==null && curNode.right==null)
+            System.out.println(path);
+        path.remove(path.size()-1) ;
+    }
+```
+
+35. 复杂链表的复制  
+题目要求：在复杂链表中，每个节点除了有一个next指针指向下一个节点，还有一个random  
+指针指向链表中的任意节点或null，请完成一个能够复制复杂链表的函数。  
+
+解题思路：  
+此题定义了一种新的数据结构，复杂链表。与传统链表的区别是多了一个random指针。本题的  
+关键点也就在如何高效地完成random指针的复制。  
+
+解法    时间复杂度   空间复杂度
+解法一   o(n^2)      o(1)
+解法二   o(n)        o(n)
+解法三   o(n)        o(1)
+
+```java
+
+/*解法一比较直接：
+先把这个复杂链表当做传统链表对待，只复制val域与next域（时间o(n)），再从新链表的头部开始，
+对random域赋值（时间o(n^2)）。*/
+
+package chapter4;
+import java.util.HashMap;
+
+/**
+ * Created by ryder on 2017/7/18.
+ * 复制复杂链表
+ */
+public class P187_CopyComplexList {
+    public static class ComplexListNode{
+        int val;
+        ComplexListNode next;
+        ComplexListNode random;
+
+        public ComplexListNode(int val) {
+            this.val = val;
+        }
+        @Override
+        public String toString() {
+            StringBuilder ret = new StringBuilder();
+            ComplexListNode cur = this;
+            while(cur!=null) {
+                ret.append(cur.val);
+                if(cur.random!=null)
+                    ret.append("("+cur.random.val+")");
+                else{
+                    ret.append("(_)");
+                }
+                ret.append('\t');
+                cur = cur.next;
+            }
+            return ret.toString();
+        }
+    }
+    //解法一
+    //time:o(n^2) space:o(1) 新链表使用的n个长度的空间不算入
+    //先复制val与next（时间o(n)），再复制random域（时间o(n^2)）
+    public static ComplexListNode clone1(ComplexListNode head){
+        if(head==null)
+            return null;
+        ComplexListNode newHead = new ComplexListNode(head.val);
+        ComplexListNode cur = head.next;
+        ComplexListNode newCur = null;
+        ComplexListNode newCurPrev = newHead;
+        while (cur!=null){
+            newCur = new ComplexListNode(cur.val);
+            newCurPrev.next = newCur;
+            newCurPrev = newCurPrev.next;
+            cur = cur.next;
+        }
+        cur = head;
+        newCur = newHead;
+        ComplexListNode temp = head;
+        ComplexListNode newTemp = newHead;
+        while(cur!=null){
+            if(cur.random!=null){
+                temp = head;
+                newTemp = newHead;
+                while (temp!=cur.random){
+                    temp = temp.next;
+                    newTemp = newTemp.next;
+                }
+                newCur.random = newTemp;
+            }
+            cur = cur.next;
+            newCur = newCur.next;
+        }
+        return newHead;
+    }
+    public static void main(String[] args){
+        ComplexListNode head = new ComplexListNode(1);
+        ComplexListNode c2 = new ComplexListNode(2);
+        ComplexListNode c3 = new ComplexListNode(3);
+        ComplexListNode c4 = new ComplexListNode(4);
+        ComplexListNode c5 = new ComplexListNode(5);
+        head.next = c2;
+        head.random = c3;
+        head.next.next = c3;
+        head.next.random = c5;
+        head.next.next.next = c4;
+        head.next.next.next.next = c5;
+        head.next.next.next.random = c2;
+        System.out.println("original:"+'\t'+head);
+        System.out.println("clone1:  "+'\t'+clone1(head));
+        System.out.println("clone2:  "+'\t'+clone2(head));
+        System.out.println("clone3:  "+'\t'+clone3(head));
+    }
+}
+
+/*解法二是用空间换时间:
+解法一时间复杂度高的原因在于确定random域的费时，即假设原链表第m个节点指向第k个节点，
+而在新链表的第m个节点处无法直接得到第k个节点，需从头遍历。很自然的想法是用一个哈希表
+记录旧链表每个节点到新链表对应节点的映射，从而可以将时间复杂度降低为o(n)。
+*/
+    //解法二
+    //time:o(n) space:o(n)
+    //使用o(n)的空间，换取了时间复杂度的降低
+    public static ComplexListNode clone2(ComplexListNode head) {
+        if(head==null)
+            return null;
+        HashMap<ComplexListNode,ComplexListNode> oldToNew = new HashMap<>();
+        ComplexListNode newHead = new ComplexListNode(head.val);
+        oldToNew.put(head,newHead);
+        ComplexListNode cur = head.next;
+        ComplexListNode newCur = null;
+        ComplexListNode newCurPrev = newHead;
+        while (cur!=null){
+            newCur = new ComplexListNode(cur.val);
+            oldToNew.put(cur,newCur);
+            newCurPrev.next = newCur;
+            newCurPrev = newCurPrev.next;
+            cur = cur.next;
+        }
+        cur = head;
+        newCur = newHead;
+        while(cur!=null){
+            if(cur.random!=null){
+                newCur.random = oldToNew.get(cur.random);
+            }
+            cur = cur.next;
+            newCur = newCur.next;
+        }
+        return newHead;
+    }
+
+/*解法三：
+思路很巧妙。将复制的任务分为如下三个部分：
+1）cloneNodes完成新链表节点的创建，仅对val域赋值，且每个新节点接在原链表对应节点的后面。
+如A->B->C,处理完后为A->A'->B->B'->C->C'，时间复杂度o(n)。
+2）connectRandomNode完成random域的赋值。假设A.random=C,我们需要设置A'.random=C'，此处
+获取C'可以在o(1)的时间复杂度完成，全部赋值完毕时间复杂度为o(n)。
+3）reconnectNodes就是将上述链表重组，使A->A'->B->B'->C->C'变为A->B->C，A'->B'->C'。
+此处需要注意尾部null的处理。*/
+
+    //解法三
+    //time:o(n) space:o(1)
+    public static ComplexListNode clone3(ComplexListNode head) {
+        if(head==null)
+            return null;
+        cloneNodes(head);
+        connectRandomNodes(head);
+        return reconnectNodes(head);
+    }
+    public static void cloneNodes(ComplexListNode head){
+        ComplexListNode cur = head;
+        ComplexListNode temp = null;
+        while (cur!=null){
+            temp = new ComplexListNode(cur.val);
+            temp.next = cur.next;
+            cur.next = temp;
+            cur = cur.next.next;
+        }
+    }
+    public static void connectRandomNodes(ComplexListNode head){
+        ComplexListNode cur = head;
+        ComplexListNode curNext = head.next;
+        while (true){
+            if(cur.random!=null)
+                curNext.random = cur.random.next;
+            cur = cur.next.next;
+            if(cur == null)
+                break;
+            curNext = curNext.next.next;
+        }
+    }
+    public static ComplexListNode reconnectNodes(ComplexListNode head){
+        ComplexListNode newHead = head.next;
+        ComplexListNode cur = head;
+        ComplexListNode newCur = newHead;
+        while (true){
+            cur.next = cur.next.next;
+            cur = cur.next;
+            if(cur==null){
+                newCur.next = null;
+                break;
+            }
+            newCur.next = newCur.next.next;
+            newCur = newCur.next;
+        }
+        return newHead;
+    }
 ```
