@@ -2423,7 +2423,7 @@ public class P151_MirrorOfBinaryTree {
 }
 ```
 
-28：对称的二叉树  
+28. 对称的二叉树  
 
 题目要求：  
 判断一棵二叉树是不是对称的。如果某二叉树与它的镜像一样，称它是对称的。  
@@ -2564,12 +2564,14 @@ public class P159_SymmetricalBinaryTree {
 解题思路：  
 此题的任务清晰明了，需要小心的是要考虑清楚边界情况。  
 上例中，环绕一次后，剩下的矩阵行数为2，列数为2，可以看成一个新的矩阵，  
-继续环绕打印。可见，此题可以用递归解决。
+继续环绕打印。可见，此题可以用递归解决。  
 示例中行数与列数是相等的，所以能够组成完整的环（完整指能够环绕一圈）；  
-其实，只要行数和列数中，比较小的那个是偶数，就能够组成完整的环。
+其实，只要行数和列数中，比较小的那个是偶数，就能够组成完整的环。  
 如果行数和列数中比较小的那个是奇数，则递归到终止前的剩余元素无法成环。  
 如果较小的是行数，则剩余元素的组成的形状类似于“|”；如果较小的是列数，  
-则剩余元素的组成的形状类似于“—”。
+则剩余元素的组成的形状类似于“—”。  
+
+重点：  
 因此，当未访问行数和未访问列数都大于等于2时，按照完整环的逻辑递归访问  
 即可。当不满足上述条件，判断剩余元素是“|”型还是“—”型，然后按照不完整环  
 的逻辑访问即可。  
@@ -2791,8 +2793,29 @@ public class P168_StackPushPopOrder {
 }
 ```
 
+32. 32-1 从上到下打印二叉树  
 
-32. 32.2分行从上到下打印二叉树  
+```java
+
+    //层序遍历
+    public static List<Integer> levelorder(TreeNode<Integer> node) {
+        Queue<TreeNode<Integer>> queue = new LinkedList<>();
+        List<Integer> list = new LinkedList<>();
+        TreeNode<Integer> temp = null;
+        if (node == null) return list;
+        queue.add(node);
+        while (!queue.isEmpty()) {
+            temp = queue.poll();
+            list.add(temp.val);
+            if (temp.left != null) queue.offer(temp.left);
+            if (temp.right != null) queue.offer(temp.right);
+        }
+        return list;
+    }
+```
+
+
+32. 32-2 分行从上到下打印二叉树  
 
 题目要求：  
 从上到下按层打印二叉树，同一层的节点按从左到右的顺序打印 ，每一层打印一行。  
@@ -2865,9 +2888,9 @@ public class P174_printTreeInLine {
 ```
 
 
-32. 32.3之字形打印二叉树  
+32. 32-3 之字形打印二叉树  
 
-题目要求：
+题目要求：  
 请实现一个函数按照之字形打印二叉树。即第一层从左到右打印，第二层从右到左打印，  
 第三层继续从左到右，以此类推。  
 
