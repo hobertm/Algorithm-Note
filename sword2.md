@@ -14,73 +14,107 @@
 上述重组过程，递归完成。  
 
 ```java
-package chapter4;
-import structure.TreeNode;
-
-/**
- * Created by ryder on 2017/7/18.
- * 二叉搜索树与双向链表
- * 将二叉搜索树转换为双向链表，树的left指向prev节点，树的right指向post节点
- * 左右支转换完之后要与根节点组合，所以左右支要返回自己的最小点与最大点两个节点，返回值使用数组
- */
-public class P191_ConvertBinarySearchTree {
-    public static TreeNode<Integer> convert(TreeNode<Integer> root){
-        if(root==null)
-            return null;
-        TreeNode<Integer>[] result = convertCore(root);
-        return result[0];
-    }
-    public static TreeNode<Integer>[] convertCore(TreeNode<Integer> node){
-        //java不支持泛型数组，所以声明为这种形式
-        TreeNode[] result = new TreeNode[2];
-        if(node.left==null&&node.right==null){
-            result[0] = node;
-            result[1] = node;
-        }
-        else if(node.right==null){
-            result = convertCore(node.left);
-            node.left = result[1];
-            result[1].right = node;
-            result[1] = node;
-        }
-        else if(node.left==null){
-            result = convertCore(node.right);
-            node.right = result[0];
-            result[0].left = node;
-            result[0] = node;
-        }
-        else{
-            TreeNode[] resultLeft = convertCore(node.left);
-            TreeNode[] resultRight = convertCore(node.right);
-            resultLeft[1].right = node;
-            node.left = resultLeft[1];
-            resultRight[0].left = node;
-            node.right = resultRight[0];
-            result[0] = resultLeft[0];
-            result[1] = resultRight[1];
-        }
-        return result;
-
-    }
-    public static void main(String[] args){
-        //            10
-        //          /   \
-        //         6     14
-        //       /  \   / \
-        //      4    8 12  16
-        TreeNode<Integer> root = new TreeNode<Integer>(10);
-        root.left = new TreeNode<Integer>(6);
-        root.right = new TreeNode<Integer>(14);
-        root.left.left = new TreeNode<Integer>(4);
-        root.left.right = new TreeNode<Integer>(8);
-        root.right.left = new TreeNode<Integer>(12);
-        root.right.right = new TreeNode<Integer>(16);
-        TreeNode<Integer> result = convert(root);
-        //转化后不可再使用二叉树的层序遍历显示结果，层序遍历会进入无限循环。
-        System.out.println(result.leftToRight());
-
-    }
-}
+/*
+方法一：非递归版
+解题思路：
+1.核心是中序遍历的非递归算法。
+2.修改当前遍历节点与前一遍历节点的指针指向。
+*/
+    import java.util.Stack;
+    public TreeNode ConvertBSTToBiList(TreeNode root) {
+        if(root==null)
+            return null;
+        Stack<TreeNode> stack = new Stack<TreeNode>();
+        TreeNode p = root;
+        TreeNode pre = null;// 用于保存中序遍历序列的上一节点
+        boolean isFirst = true;
+        while(p!=null||!stack.isEmpty()){
+            while(p!=null){
+                stack.push(p);
+                p = p.left;
+            }
+            p = stack.pop();
+            if(isFirst){
+                root = p;// 将中序遍历序列中的第一个节点记为root
+                pre = root;
+                isFirst = false;
+            }else{
+                pre.right = p;
+                p.left = pre;
+                pre = p;
+            }      
+            p = p.right;
+        }
+        return root;
+    }
+/*
+方法二：递归版
+解题思路：
+1.将左子树构造成双链表，并返回链表头节点。
+2.定位至左子树双链表最后一个节点。
+3.如果左子树链表不为空的话，将当前root追加到左子树链表。
+4.将右子树构造成双链表，并返回链表头节点。
+5.如果右子树链表不为空的话，将该链表追加到root节点之后。
+6.根据左子树链表是否为空确定返回的节点。
+*/
+    public TreeNode Convert(TreeNode root) {
+        if(root==null)
+            return null;
+        if(root.left==null&&root.right==null)
+            return root;
+        // 1.将左子树构造成双链表，并返回链表头节点
+        TreeNode left = Convert(root.left);
+        TreeNode p = left;
+        // 2.定位至左子树双链表最后一个节点
+        while(p!=null&&p.right!=null){
+            p = p.right;
+        }
+        // 3.如果左子树链表不为空的话，将当前root追加到左子树链表
+        if(left!=null){
+            p.right = root;
+            root.left = p;
+        }
+        // 4.将右子树构造成双链表，并返回链表头节点
+        TreeNode right = Convert(root.right);
+        // 5.如果右子树链表不为空的话，将该链表追加到root节点之后
+        if(right!=null){
+            right.left = root;
+            root.right = right;
+        }
+        return left!=null?left:root;       
+    }
+/*
+方法三：改进递归版
+解题思路：
+思路与方法二中的递归版一致，仅对第2点中的定位作了修改，
+新增一个全局变量记录左子树的最后一个节点。
+*/
+    // 记录子树链表的最后一个节点，终结点只可能为只含左子树的非叶节点与叶节点
+    protected TreeNode leftLast = null;
+    public TreeNode Convert(TreeNode root) {
+        if(root==null)
+            return null;
+        if(root.left==null&&root.right==null){
+            leftLast = root;// 最后的一个节点可能为最右侧的叶节点
+            return root;
+        }
+        // 1.将左子树构造成双链表，并返回链表头节点
+        TreeNode left = Convert(root.left);
+        // 3.如果左子树链表不为空的话，将当前root追加到左子树链表
+        if(left!=null){
+            leftLast.right = root;
+            root.left = leftLast;
+        }
+        leftLast = root;// 当根节点只含左子树时，则该根节点为最后一个节点
+        // 4.将右子树构造成双链表，并返回链表头节点
+        TreeNode right = Convert(root.right);
+        // 5.如果右子树链表不为空的话，将该链表追加到root节点之后
+        if(right!=null){
+            right.left = root;
+            root.right = right;
+        }
+        return left!=null?left:root;       
+    }
 ```
 
 37：序列化二叉树  
