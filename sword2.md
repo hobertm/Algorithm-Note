@@ -1014,7 +1014,7 @@ public class P221_NumberOf1 {
 数字以01234567891011121314...的格式排列。在这个序列中，第5位（从0开始计）是5，  
 第13位是1，第19位是4。求任意第n为对应的数字。  
 
-解题思路：
+解题思路：  
 与43题类似,都是数学规律题。如果用遍历的方式，思路代码都很简单，但速度较慢。更好的  
 方式是借助于数字序列的规律，感觉更像是数学题。步骤大致可以分为如下三部分：  
 
@@ -1155,11 +1155,11 @@ public class P227_SortArrayForMinNumber {
 
 自下而上，动态规划，从最小的问题开始 ：
 f(r)表示以r为开始（r最小取0）到最右端所组成的数字能够翻译成字符串的种数。  
-对于长度为n的数字，f(n)=0,f(n-1)=1,求f(0)。
+对于长度为n的数字，f(n)=1,f(n-1)=1,求f(0)。
 递推公式为 f(r-2) = f(r-1)+g(r-2,r-1)*f(r)；
 其中，如果r-2，r-1能够翻译成字符，则g(r-2,r-1)=1，否则为0。
 因此，对于12258：
-f(5) = 0
+f(5) = 1
 f(4) = 1
 f(3) = f(4)+0 = 1
 f(2) = f(3)+f(4) = 2
@@ -1181,7 +1181,7 @@ public class P231_TranslateNumbersToStrings {
     //f(r-2) = f(r-1)+g(r-2,r-1)*f(r);
     //如果r-2，r-1能够翻译成字符，则g(r-2,r-1)=1，否则为0
     public static int getTranslationCount(String number) {
-        int f1 = 0,f2 = 1,g = 0;
+        int f1 = 1,f2 = 1,g = 0;
         int temp;
         for(int i=number.length()-2;i>=0;i--){
             if(Integer.parseInt(number.charAt(i)+""+number.charAt(i+1))<26)
@@ -1195,8 +1195,8 @@ public class P231_TranslateNumbersToStrings {
         return f2;
     }
     public static void main(String[] args){
-        System.out.println(getTranslationCount(-10));  //0
-        System.out.println(getTranslationCount(1234));  //3
+        System.out.println(getTranslationCount(5));  //1
+        System.out.println(getTranslationCount(12222));  //8
         System.out.println(getTranslationCount(12258)); //5
     }
 }
