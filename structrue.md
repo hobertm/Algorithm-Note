@@ -1,6 +1,6 @@
 - BTree  
 
-![B树，B+树](https://www.cnblogs.com/nullzx/p/8729425.html#4053893)   
+[B树，B+树](https://www.cnblogs.com/nullzx/p/8729425.html#4053893)   
 
 m阶的B树定义如下：
 
@@ -16,7 +16,7 @@ B树插入如果不能，中间值变成父节点
 
 - 红黑树  
 
-![234树，红黑树](https://www.cnblogs.com/nullzx/p/6111175.html)  
+[234树，红黑树](https://www.cnblogs.com/nullzx/p/6111175.html)  
 234树，如果不能直接插入，先分裂再插入，分裂出的根向上合并  
 删除节点，该节点不是2节点，删除key，结束。该节点是2节点，删除后进行后续操作。  
 
