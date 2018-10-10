@@ -34,17 +34,11 @@ B树插入如果不能，中间值变成父节点
 
 - HashMap 1.7,1.8  
 
-https://blog.csdn.net/carson_ho/article/details/79373134  
+[1.8 HashMap](https://blog.csdn.net/carson_ho/article/details/79373134)  
 区别红黑树，头插法尾插法，扩容机制，7是重新计算hash。  
 8由于扩容一倍，与运算的值增加一位，直接判断新增的hash最高位是0或1，  
 数据直接转移到相同位置，或移到相同位置加原长度。  
 
 开放地址法，链地址法，再哈希解决冲突  
-
-
-
-
-
-
 
 
