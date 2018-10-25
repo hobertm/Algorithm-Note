@@ -1,5 +1,5 @@
 
-2. 单例模式  
+2：单例模式  
 
 ```java
 
@@ -67,12 +67,12 @@ class InstanceFactory {
 }
 ```
 
-3. 数组中重复的数字  
+3：数组中重复的数字  
 
 ```java
 
 /**
- * Created by ryder on 2017/6/11. * 一个长度为n的数组，值的范围在0~n-1内，有一个或多个数字重复，求其中任意一个
+ * Created by ryder on 2017/6/11：* 一个长度为n的数组，值的范围在0~n-1内，有一个或多个数字重复，求其中任意一个
  */
 
 public class P39_DuplicationInArray {
@@ -202,11 +202,11 @@ public class P39_DuplicationInArray {
 
 ```
 
-4. 二维数组中的查找  
+4：二维数组中的查找  
 
 ```java
 /**
- * Created by ryder on 2017/6/12. * 二维数组，从左到右递增，从上到下递增，输入一个整数，判断数组中是否含有
+ * Created by ryder on 2017/6/12：* 二维数组，从左到右递增，从上到下递增，输入一个整数，判断数组中是否含有
  */
 public class P44_FindInPartiallySortedMatrix {
     public static boolean findInPartiallySortedMatrix(int[][] data, int target) {
@@ -230,7 +230,7 @@ public class P44_FindInPartiallySortedMatrix {
 
 ```
 
-5. 替换空格  
+5：替换空格  
 
 ```java
 public class P51_ReplaceSpaces {
@@ -264,7 +264,7 @@ public class P51_ReplaceSpaces {
 
 ```
 
-6. 从尾到头打印链表  
+6：从尾到头打印链表  
 
 ```java
 public class ListNode<T> {
@@ -297,7 +297,7 @@ public class ListNode<T> {
 
 
 /**
- * Created by ryder on 2017/6/13. * 从尾到头打印链表
+ * Created by ryder on 2017/6/13：* 从尾到头打印链表
  */
 public class P58_PrintListInReversedOrder { 
 	//递归版 
@@ -501,7 +501,7 @@ public class P60_TraversalOfBinaryTree {
 }
 ```
 
-7. 重建二叉树  
+7：重建二叉树  
 
 ```java
 
@@ -556,7 +556,7 @@ public class P62_ConstructBinaryTree {
 
 ```
 
-8. 二叉树的下一个节点
+8：二叉树的下一个节点
 
 ```java
 
@@ -635,7 +635,7 @@ public class P65_NextNodeInBinaryTrees {
 
 ```
 
-9. 用两个栈实现队列  
+9：用两个栈实现队列  
 
 
 ```java
@@ -689,7 +689,7 @@ public class P68_QueueWithTwoStacks {
 
 ```
 
-10. 斐波那契数列  
+10：斐波那契数列  
 
 ```java
 /**
@@ -1095,7 +1095,7 @@ public class P79_Sort {
 
 ```
 
-11. 旋转数组的最小数字  
+11：旋转数组的最小数字  
 
 ```java
 /**
@@ -1224,7 +1224,7 @@ public class P89_StringPathInMatrix {
 
 ```
 
-13. 机器人的运动范围  
+13：机器人的运动范围  
 
 题目要求：
 地上有一个m行n列的方格，一个机器人从坐标(0,0)的各自开始移动，它每次  
@@ -1292,7 +1292,7 @@ public class P92_RobotMove {
 ```
 
 
-14. 剪绳子  
+14：剪绳子  
 
 题目要求：  
 给你一根长度为n的绳子，请把绳子剪成m段，记每段绳子长度为  k[0],k[1]...k[m-1],  
@@ -1350,7 +1350,7 @@ public class P96_CuttingRope {
 ```
 
 
-15. 位运算  
+15：位运算  
 
 题目要求：
 实现一个函数，输入一个int型整数，输出该数字在计算机中二进制表示形式的1的个数。  
@@ -1419,7 +1419,7 @@ public class P100_NumberOf1InBinary {
 
 ```
 
-16. 数值的整数次方  
+16：数值的整数次方  
 
 题目要求：  
 实现函数double power（double base，int exponent），求base的exponent次方。  
@@ -1486,7 +1486,7 @@ public class P110_Power {
 ```
 
 
-17. 打印从1到最大的n位数  
+17：打印从1到最大的n位数  
 
 题目要求：  
 比如输入2，打印1,2......98,99；  
@@ -1547,7 +1547,7 @@ public class P114_Print1ToMaxOfNDigits {
 ```
 
 
-18. 删除链表的节点  
+18：删除链表的节点  
 
 题目要求：  
 在o(1)时间内删除单链表的节点。  
@@ -1628,7 +1628,7 @@ public class P119_DeleteNodeInList {
 ```
 
 
-18. 题目二：删除排序链表中重复的节点  
+18：题目二：删除排序链表中重复的节点  
 
 题目要求：  
 比如[1,2,2,3,3,3],删除之后为[1];  
@@ -1723,7 +1723,7 @@ public class P122_deleteDuplicatedNode {
 }
 ```
 
-19. 正则表达式匹配  
+19：正则表达式匹配  
 
 题目要求：  
 实现正则表达式中.和*的功能。.表示任意一个字符，*表示他前面的字符的任意次（含0次）。  
@@ -1786,7 +1786,7 @@ public class P124_RegularExpressionsMatching {
 }
 ```
 
-20. 表示数值的字符串  
+20：表示数值的字符串  
 
 题目要求：  
 判断一个字符串是否表示数值，如+100,5e2，-123，-1E-16都是，  
@@ -1884,7 +1884,7 @@ public class P127_NumberStrings {
 }
 ```
 
-21. 调整数组顺序使奇数位于偶数前面  
+21：调整数组顺序使奇数位于偶数前面  
 
 题目要求：  
 实现一个函数来调整数组中的数字，使得所有奇数位于数组的前半部分，偶数位于后半部分。  
@@ -1934,7 +1934,7 @@ public class P129_ReorderArray {
 ```
 
 
-22. 链表中倒数第k个节点  
+22：链表中倒数第k个节点  
 
 题目要求：  
 求链表中倒数第k个节点。链表的尾节点定义为倒数第1个节点。  
@@ -2010,7 +2010,7 @@ public class P134_KthNodeFromEnd {
 }
 ```
 
-23. 链表中环的入口节点  
+23：链表中环的入口节点  
 
 题目要求：  
 假设一个链表中包含环，请找出入口节点。若没有环则返回null。  
@@ -2096,7 +2096,7 @@ int main(){
 ```
 
 
-24. 反转链表  
+24：反转链表  
 
 解题思路：  
 想要链表反转时不断裂，至少需要3个变量记录，pre，cur，post。与前面的题目类似，  
@@ -2166,7 +2166,7 @@ public class P142_ReverseList {
 ```
 
 
-25. 合并两个排序的链表  
+25：合并两个排序的链表  
 
 题目要求：  
 输入两个递增排序的链表，要求合并后保持递增。  
@@ -2262,7 +2262,7 @@ public class P145_MergeSortedLists {
 }
 ```
 
-26. 树的子结构  
+26：树的子结构  
 
 题目要求：  
 输入两棵二叉树A和B，判断B是不是A的子结构。  
@@ -2337,7 +2337,7 @@ public class P148_SubstructureInTree {
 }
 ```
 
-27. 二叉树的镜像  
+27：二叉树的镜像  
 
 题目要求：  
 求一棵二叉树的镜像。  
@@ -2416,7 +2416,7 @@ public class P151_MirrorOfBinaryTree {
 }
 ```
 
-28. 对称的二叉树  
+28：对称的二叉树  
 
 题目要求：  
 判断一棵二叉树是不是对称的。如果某二叉树与它的镜像一样，称它是对称的。  
@@ -2542,7 +2542,7 @@ public class P159_SymmetricalBinaryTree {
 }
 ```
 
-29. 顺时针打印矩阵  
+29：顺时针打印矩阵  
 
 题目要求：  
 输入一个矩阵，按照从外向里以顺时针的顺序一次打印出每一个数字。  
@@ -2659,7 +2659,7 @@ public class P161_PrintMatrix {
 }
 ```
 
-30. 包含min函数的栈  
+30：包含min函数的栈  
 
 题目要求：  
 定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的min函数。  
@@ -2728,7 +2728,7 @@ class StackWithMin<T extends Comparable>{
 ```
 
 
-31. 栈的压入弹出序列  
+31：栈的压入弹出序列  
 
 题目要求：  
 输入两个整数序列，第一个序列表示栈的压入顺序，判断第二个序列是否为该栈的弹出序序列。  
@@ -2786,7 +2786,7 @@ public class P168_StackPushPopOrder {
 }
 ```
 
-32. 32-1 从上到下打印二叉树  
+32：32-1 从上到下打印二叉树  
 
 ```java
 
@@ -2808,7 +2808,7 @@ public class P168_StackPushPopOrder {
 ```
 
 
-32. 32-2 分行从上到下打印二叉树  
+32：32-2 分行从上到下打印二叉树  
 
 题目要求：  
 从上到下按层打印二叉树，同一层的节点按从左到右的顺序打印 ，每一层打印一行。  
@@ -2881,7 +2881,7 @@ public class P174_printTreeInLine {
 ```
 
 
-32. 32-3 之字形打印二叉树  
+32：32-3 之字形打印二叉树  
 
 题目要求：  
 请实现一个函数按照之字形打印二叉树。即第一层从左到右打印，第二层从右到左打印，  
@@ -2968,7 +2968,7 @@ public class P176_printTreeInSpecial {
 }
 ```
 
-33. 二叉搜索树的后序遍历  
+33：二叉搜索树的后序遍历  
 
 题目要求：  
 输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果，假设输入数组的任意两个数都互不相同。  
@@ -3023,7 +3023,7 @@ public class P179_SequenceOfBST {
 }
 ```
 
-34. 二叉树中和为某一值的路径  
+34：二叉树中和为某一值的路径  
 
 题目要求：  
 输入一棵二叉树和一个整数，打印出二叉树中节点值的和为输入整数的所有路径。  
@@ -3109,7 +3109,7 @@ public class P182_FindPath {
     }
 ```
 
-35. 复杂链表的复制  
+35：复杂链表的复制  
 题目要求：在复杂链表中，每个节点除了有一个next指针指向下一个节点，还有一个random  
 指针指向链表中的任意节点或null，请完成一个能够复制复杂链表的函数。  
 
