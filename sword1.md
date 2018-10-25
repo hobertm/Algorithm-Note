@@ -895,71 +895,64 @@ public class P79_Sort {
 堆排序：
 package chapter2;
 
-/**
- * Created by ryder on 2017/6/25.
- * 数组排序算法
- */
-public class P79_Sort {
-    //数组堆排序，时间o(nlogn)，空间o(1),不稳定
-    //建立最大堆，交换堆的第一个与最后一个元素，调整堆
-    //注意，堆排序的0号元素不能使用，为了与其他排序统一接口，先把最小的元素放到0号元素上，再用堆排序
-    public static void heapSort(int[] data){
-        if(data==null || data.length<=1)
-            return;
-        //先把最小的元素放到0号元素上
-        int minIndex = 0;
-        for(int i=1;i<data.length;i++){
-            if(data[i]<data[minIndex])
-                minIndex = i;
+//数组堆排序，时间o(nlogn)，空间o(1),不稳定
+//建立最大堆，交换堆的第一个与最后一个元素，调整堆
+public class HeapSort {
+    public static void HeapAdjust(int[] num, int s, int l) {
+        int i, j;
+        int temp = num[s];
+        i = s;
+        // 根据二叉树的性质可知道每一个序号对应的子节点以及双亲节点
+        for (j = 2 * i + 1; j <= l; j = 2 * j + 1) {
+            //判断如果j指向数值较大的节点
+            if (j < l && num[j] < num[j + 1]) {
+                j = j + 1;
+            }
+            //如果调整节点大于其子节点最大的值则无需调整
+            if (temp > num[j]) {
+                break;
+            }
+            //如果小于则将子节点移动到根节点位置，如果还存在子节点则继续判断调整位置的子节点
+            //准备继续向下 调整节点
+            num[i] = num[j];
+            i = j;
         }
-        if(minIndex!=0){
-            int temp = data[0];
-            data[0] = data[minIndex];
-            data[minIndex] = temp;
-        }
-        //正式开始堆排序（如果0号元素未存值，省略上述代码）
-        buildMaxHeap(data);
-        for(int indexBound = data.length-1;indexBound>1;){
-            int temp = data[indexBound];
-            data[indexBound] = data[1];
-            data[1] = temp;
-            indexBound--;
-            adjustMaxHeap(data,1,indexBound);
-        }
+        //最后插入数据
+        num[i] = temp;
     }
-    public static void buildMaxHeap(int[] data){
-        for(int i = data.length/2;i>0;i--){
-            adjustMaxHeap(data,i,data.length-1);
-        }
-    }
-    //i表示待调整元素下标，end表示最大堆的最后一个元素的下标，end值会随着排序的进行而减小到1
-    public static void adjustMaxHeap(int[] data,int i,int end){
-        int left = 2*i;
-        int right = 2*i+1;
-        int max = i;
-        if(left<=end && data[left]>data[max])
-            max = left;
-        if(right<=end && data[right]>data[max])
-            max = right;
-        if(max!=i){
-            int temp = data[max];
-            data[max] = data[i];
-            data[i] = temp;
-            adjustMaxHeap(data,max,end);
+
+    public static void HeapInit(int[] nums, int l) {
+        for (int i = (l - 1) / 2; i >= 0; i--) {
+            HeapAdjust(nums, i, l);
+            System.out.println(Arrays.toString(nums)+", i:" +i);
+
         }
     }
 
-    public static void testHeapSort(){
-        int[] data = {5,4,3,1,2};
-        heapSort(data);
-        System.out.print("数组堆排序：\t");
-        for(int item: data){
-            System.out.print(item);
-            System.out.print('\t');
+    public static void HeapSort(int[] nums, int l) {
+        for (int i = l; i > 0; i--) {
+            int temp = nums[0];
+            nums[0] = nums[i];
+            nums[i] = temp;
+            //因为每次调整都是对根节点进行调整所以下列方法s永远为0
+            HeapAdjust(nums, 0, i - 1);
+            System.out.println(Arrays.toString(nums)+", l:" +i);
+
         }
-        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        int[] nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        //第一步根据节点创建堆
+        HeapInit(nums,8);
+
+        //第二步排序
+        HeapSort(nums, 8);
+        System.out.println( Arrays.toString(nums));
+
     }
 }
+
 冒泡排序：
 package chapter2;
 
